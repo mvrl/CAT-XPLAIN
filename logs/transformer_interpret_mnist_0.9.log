@@ -1,0 +1,47 @@
+no change     /mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/my_install/miniconda3/condabin/conda
+no change     /mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/my_install/miniconda3/bin/conda
+no change     /mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/my_install/miniconda3/bin/conda-env
+no change     /mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/my_install/miniconda3/bin/activate
+no change     /mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/my_install/miniconda3/bin/deactivate
+no change     /mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/my_install/miniconda3/etc/profile.d/conda.sh
+no change     /mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/my_install/miniconda3/etc/fish/conf.d/conda.fish
+no change     /mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/my_install/miniconda3/shell/condabin/Conda.psm1
+no change     /mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/my_install/miniconda3/shell/condabin/conda-hook.ps1
+no change     /mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/my_install/miniconda3/lib/python3.8/site-packages/xontrib/conda.xsh
+no change     /mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/my_install/miniconda3/etc/profile.d/conda.csh
+no change     /home/skh259/.bashrc
+No action taken.
+1.21.2
+1.10.1
+cuda:0
+Train data set: 60000
+Test data set: 10000
+==============================
+Train data set: 48000
+Valid data set: 12000
+Test data set: 10000
+9557 2425 1984
+150 38 31
+
+Initialization Number 1-> epoch: 1, average loss: 0.398, val_acc: 0.509, ICE: -0.042 
+
+
+Initialization Number 1-> epoch: 2, average loss: -0.007, val_acc: 0.616, ICE: 0.097 
+
+BEST EPOCH BASED ON VAL PERFORMANCE: 1
+BEST (VAL_ACC,VAL_ICE) (0.6156701030927835, tensor(0.0970))
+
+Initialization Number 2-> epoch: 1, average loss: 0.436, val_acc: 0.515, ICE: -0.068 
+
+
+Initialization Number 2-> epoch: 2, average loss: 0.045, val_acc: 0.656, ICE: 0.100 
+
+BEST EPOCH BASED ON VAL PERFORMANCE: 1
+BEST (VAL_ACC,VAL_ICE) (0.6556701030927835, tensor(0.1003))
+mean val ph acc: 0.636 , std dev: 0.020 
+mean val ICE: 0.099 , std dev: 0.002 
+mean test ph acc: 0.636 , std dev: 0.026 
+mean test ICE: 0.097 , std dev: 0.007 
+
+DONE! 
+

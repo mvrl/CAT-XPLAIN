@@ -1,3 +1,5 @@
+# ## Most of the code below is taken from: https://github.com/pranoy-panda/Causal-Feature-Subset-Selection
+
 # importing local libraries
 # from utils import *
 # from models_file import BaseModel, gumbel_selector
@@ -43,13 +45,14 @@ torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
 
 
-def train_eval(dataset_name, bb_model_type, sel_model_type):
+def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validation='without_test'):
   cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize = load_dataset(dataset_name=dataset_name)
   print("For dataset:",dataset_name)
   print("For Experiment with bb_model:",bb_model_type)
   print("For Experiment with sel_model:",sel_model_type)
   print('1. Training the Basemodel...... \n')
 
+  k = M*M-num_patches# number of patches for S_bar
   ## Initialize Base model
   if bb_model_type == 'ViT':
     bb_model =  ViT(
@@ -83,7 +86,10 @@ def train_eval(dataset_name, bb_model_type, sel_model_type):
                 kwargs['batch_size'])
 
   # testing the model on held-out validation dataset
-  test_basemodel(cls,valloader,bb_model)
+  if validation == 'without_test':
+    test_basemodel(cls,valloader,bb_model)
+  else:
+    test_basemodel(cls,testloader,bb_model)
   print('Basemodel trained! \n')
 
   ##############################################################
@@ -93,8 +99,8 @@ def train_eval(dataset_name, bb_model_type, sel_model_type):
   '''
   generate images with random patches selected for calculating the ACE metric
   '''
-  imgs_with_random_patch_val = imgs_with_random_patch_generator(valloader,valid_datasize)
-  imgs_with_random_patch_test = imgs_with_random_patch_generator(testloader,test_datasize)     
+  imgs_with_random_patch_val = imgs_with_random_patch_generator(valloader,valid_datasize,num_patches)
+  imgs_with_random_patch_test = imgs_with_random_patch_generator(testloader,test_datasize,num_patches)     
 
   # training loop where we run the experiments for multiple times and report the 
 # mean and standard deviation of the metrics ph_acc and ICE.
@@ -165,7 +171,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type):
           
             running_loss+=loss.item() # average loss per sample
   ################################################################################
-        val_acc,val_ice = metrics(cls,selector,M,N,iter_num,valloader,imgs_with_random_patch_val,bb_model)
+        val_acc,val_ice = metrics(cls,selector,k,M,N,iter_num,valloader,imgs_with_random_patch_val,bb_model)
         val_accs.append(val_acc)
         val_ices.append(val_ice)
         model_checkpoint = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(epoch)+'_posthoc_selector.pt')
@@ -205,17 +211,17 @@ def train_eval(dataset_name, bb_model_type, sel_model_type):
     checkpoint = torch.load(best_model_path)
     best_model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    test_acc,test_ice = metrics(cls,best_model,M,N,iter_num,testloader,imgs_with_random_patch_test,bb_model,intrinsic=False)
+    test_acc,test_ice = metrics(cls,best_model,k,M,N,iter_num,testloader,imgs_with_random_patch_test,bb_model,intrinsic=False)
     
     test_acc_list.append(test_acc)
     test_ice_list.append(test_ice)
-
-      
+   
   print('mean val ph acc: %.3f'%(np.mean(val_acc_list)),', std dev: %.3f '%(np.std(val_acc_list))) 
   print('mean val ICE: %.3f'%(np.mean(val_ice_list)),', std dev: %.3f '%(np.std(val_ice_list))) 
 
-  print('mean test ph acc: %.3f'%(np.mean(test_acc_list)),', std dev: %.3f '%(np.std(test_acc_list))) 
-  print('mean test ICE: %.3f'%(np.mean(test_ice_list)),', std dev: %.3f '%(np.std(test_ice_list))) 
+  if validation == 'with_test':
+    print('mean test ph acc: %.3f'%(np.mean(test_acc_list)),', std dev: %.3f '%(np.std(test_acc_list))) 
+    print('mean test ICE: %.3f'%(np.mean(test_ice_list)),', std dev: %.3f '%(np.std(test_ice_list))) 
 
   print('\nDONE! \n')
 
@@ -226,9 +232,13 @@ if  __name__ == '__main__':
     parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[fmnist, mnist]", default= 'mnist')
     parser.add_argument('--bb_model_type', type=str,help="Base_model type: Options:[ViT, ConvNet, MLPNet]",default="ViT")
     parser.add_argument('--sel_model_type', type=str,help="select_model type: Options:[ViT, ConvNet, MLPNet]",default="ViT")
+    parser.add_argument('--num_patches',  type=str,help="number of patches to select: Options[2,4,6,8,10]", default= "10")
+    parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     parser.add_argument('--sweep', type=str,help="select_model type: Options:[sweep,no_sweep]",default="no_sweep")
     args = parser.parse_args()
 
+    validation = args.validation
+    num_patches = int(args.num_patches)
     HyperParameters = edict()
     HyperParameters.dataset_name = ["mnist", "fmnist", "imdb"]
     HyperParameters.bb_model_type = ["ViT", "ConvNet", "MLPNet"]
@@ -241,12 +251,12 @@ if  __name__ == '__main__':
         bb_model_type = hp[1]
         sel_model_type = hp[2]
         print("For parameters:(dataset_name, BaseModel,Selector)",hp)
-        train_eval(dataset_name, bb_model_type, sel_model_type)
+        train_eval(dataset_name, bb_model_type, sel_model_type,validation)
     else:
       dataset_name = args.dataset_name
       bb_model_type = args.bb_model_type
       sel_model_type = args.sel_model_type
-      train_eval(dataset_name, bb_model_type, sel_model_type)
+      train_eval(dataset_name, bb_model_type, sel_model_type,num_patches,validation)
 
 
 

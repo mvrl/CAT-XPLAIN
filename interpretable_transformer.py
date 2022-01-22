@@ -1,3 +1,5 @@
+### Most of the code below is taken from: https://github.com/pranoy-panda/Causal-Feature-Subset-Selection
+
 # relevant libraries
 import numpy as np
 import torch
@@ -48,8 +50,9 @@ test_acc_list = []
 test_ice_list = []
 
 
-def train_eval(dataset_name,loss_weight=0.9):
+def train_eval(dataset_name,loss_weight,num_patches,validation):
   seed_initialize(seed = 12345)
+  k = M*M-num_patches# number of patches for S_bar
   ###################################### LOAD DATASET ######################################################
   cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize = load_dataset(dataset_name=dataset_name)
 
@@ -59,8 +62,8 @@ def train_eval(dataset_name,loss_weight=0.9):
   to generate images with random patches selected
   '''
 
-  imgs_with_random_patch_val = imgs_with_random_patch_generator(valloader,valid_datasize)
-  imgs_with_random_patch_test = imgs_with_random_patch_generator(testloader,test_datasize)
+  imgs_with_random_patch_val = imgs_with_random_patch_generator(valloader,valid_datasize,num_patches)
+  imgs_with_random_patch_test = imgs_with_random_patch_generator(testloader,test_datasize,num_patches)
 
   ######################################################################################################################################################
   #                                             MAIN TRAINING CODE                                                                                     #
@@ -128,7 +131,7 @@ def train_eval(dataset_name,loss_weight=0.9):
 
           running_loss+=loss.item() # sum to caluclate average loss per sample later
         
-        val_acc,val_ice = metrics(cls, selector,M,N,iter_num,valloader,imgs_with_random_patch_val,selector,intrinsic=True)
+        val_acc,val_ice = metrics(cls, selector,k,M,N,iter_num,valloader,imgs_with_random_patch_val,selector,intrinsic=True)
         val_accs.append(val_acc)
         val_ices.append(val_ice)
         model_checkpoint = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(epoch)+'_Interpretable_selector.pt')
@@ -162,7 +165,7 @@ def train_eval(dataset_name,loss_weight=0.9):
       checkpoint = torch.load(best_model_path)
       best_model.load_state_dict(checkpoint['model_state_dict'])
       optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-      test_acc,test_ice = metrics(cls, best_model,M,N,iter_num,testloader,imgs_with_random_patch_test,best_model,intrinsic=True)
+      test_acc,test_ice = metrics(cls, best_model,k,M,N,iter_num,testloader,imgs_with_random_patch_test,best_model,intrinsic=True)
       
       test_acc_list.append(test_acc)
       test_ice_list.append(test_ice)
@@ -171,8 +174,9 @@ def train_eval(dataset_name,loss_weight=0.9):
   print('mean val ph acc: %.3f'%(np.mean(val_acc_list)),', std dev: %.3f '%(np.std(val_acc_list))) 
   print('mean val ICE: %.3f'%(np.mean(val_ice_list)),', std dev: %.3f '%(np.std(val_ice_list))) 
 
-  print('mean test ph acc: %.3f'%(np.mean(test_acc_list)),', std dev: %.3f '%(np.std(test_acc_list))) 
-  print('mean test ICE: %.3f'%(np.mean(test_ice_list)),', std dev: %.3f '%(np.std(test_ice_list))) 
+  if validation == 'with_test':
+    print('mean test ph acc: %.3f'%(np.mean(test_acc_list)),', std dev: %.3f '%(np.std(test_acc_list))) 
+    print('mean test ICE: %.3f'%(np.mean(test_ice_list)),', std dev: %.3f '%(np.std(test_ice_list))) 
 
   print('\nDONE! \n')
 
@@ -183,7 +187,11 @@ if  __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[fmnist, mnist]", default= 'mnist')
     parser.add_argument('--loss_weight',  type=str,help="weight assigned to selection loss", default= "0.9")
+    parser.add_argument('--num_patches',  type=str,help="number of patches to select: Options[2,4,6,8,10]", default= "10")
+    parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     args = parser.parse_args()
     dataset_name = args.dataset_name
-    loss_weight = float(args.loss_weight)  
-    train_eval(dataset_name,loss_weight)
+    num_patches = int(args.num_patches)
+    loss_weight = float(args.loss_weight)
+    validation = args.validation  
+    train_eval(dataset_name,loss_weight,num_patches,validation)

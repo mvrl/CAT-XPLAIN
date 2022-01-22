@@ -1,3 +1,5 @@
+## Most of the code below is taken from: https://github.com/pranoy-panda/Causal-Feature-Subset-Selection
+
 import torch
 import numpy as np
 from torch import nn, optim
@@ -9,7 +11,7 @@ from torchvision import datasets as vision_datasets
 from torchtext import datasets as text_datasets
 from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader, Sampler, SubsetRandomSampler
-from config2 import *
+from config import *
 from tqdm import tqdm
 #################################################################################################################################
 
@@ -17,35 +19,7 @@ from tqdm import tqdm
 ######################                           DATA LOADING                #########################################
 
 
-# defining subloaders for creating binary classification dataset from multi-class dataset
-'''
-MNIST dataset
-'''
-class subLoader_MNIST(datasets.MNIST):
-    def __init__(self, cls:[], **kwargs):
-        super(subLoader_MNIST, self).__init__(**kwargs)
-        #self.targets and self.data are tensors
-        self.mask = (self.targets.view(-1,1) == torch.tensor(cls).view(1,-1)).any(dim=1)
-        
-        self.targets = self.targets[self.mask]
-        self.targets = (self.targets == cls[-1]).long()
-        self.data = self.data[self.mask]
-
-'''
-FashionMNIST dataset
-'''
-class subLoader_FMNIST(datasets.FashionMNIST):
-    def __init__(self, cls:[], **kwargs):
-        super(subLoader_FMNIST, self).__init__(**kwargs)
-        #self.targets and self.data are tensors
-        self.mask = (self.targets.view(-1,1) == torch.tensor(cls).view(1,-1)).any(dim=1)
-        
-        self.targets = self.targets[self.mask]
-        self.targets = (self.targets == cls[-1]).long()
-        self.data = self.data[self.mask]
-
-
-##########################################################################################################
+################################################################################################################################
 def mask_generator(dataset,cls):
   mask = []
   for i in range(len(dataset)):
@@ -104,7 +78,7 @@ def load_dataset(dataset_name='mnist'):
   return cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize
 
 ##################### RANDOM PATCH GENERATOR FOR VALIDATION AND TEST DATASET #############################
-def imgs_with_random_patch_generator(valloader,no_datapoints):
+def imgs_with_random_patch_generator(valloader,no_datapoints,num_patches):
   '''
   uncomment to generate images with random patches selected
   '''
@@ -173,7 +147,7 @@ X_S: augmented X, where the un-selected patches are masked out(here, replaced by
 X_Sbar: augmented X, where the selected patches are masked out(here, replaced by zero)
 S_bar: a map/2D matrix where the un-selected patches are set to 1 and selected patches are set to 0
 '''
-def generate_xs(X,selector,M,N,intrinsic=False): # M x M is the size of the patch, and M*N x M*N is the size of the instance X
+def generate_xs(X,selector,k,M,N,intrinsic=False): # M x M is the size of the patch, and M*N x M*N is the size of the instance X
     batch_size = X.shape[0]
     X = X.to(device)
   # 1: get the logits from the selector for instance X
@@ -204,7 +178,8 @@ This function calculates thes two metrics for evaluating the explanations
 2. average ICE: (1/batch_size)*( p(y=c/xs) - p(y=c/x') ), here c is class 
    predicted by basemodel and x' is the image where k patches are randomly selected from x are present, rest all patches are null
 '''
-def metrics(cls,selector,M,N,init_num,valloader,imgs_with_random_patch,bb_model,intrinsic=False):
+import sys
+def metrics(cls,selector,k,M,N,init_num,valloader,imgs_with_random_patch,bb_model,intrinsic=False):
   
   # if intrinsic:
   #   bb_model = selector
@@ -213,8 +188,8 @@ def metrics(cls,selector,M,N,init_num,valloader,imgs_with_random_patch,bb_model,
   for images,labels in valloader:
     for i in range(len(images)):
       img = images[i].unsqueeze(0).to(device)
-      label =  torch.tensor(labels.numpy()[i] == cls[-1]).to(device)
-      xs,v = generate_xs(img,selector,M,N,intrinsic)
+      label = torch.tensor([1 if labels[i] == cls[-1] else 0][0]).to(device)
+      xs,v = generate_xs(img,selector,k,M,N,intrinsic)
       xprime = torch.Tensor(imgs_with_random_patch[init_num][all_count]).unsqueeze(0).unsqueeze(0).to(device)
       with torch.no_grad():
     # get the augmented image(from val. dataset)
@@ -228,7 +203,7 @@ def metrics(cls,selector,M,N,init_num,valloader,imgs_with_random_patch,bb_model,
             out_x = F.softmax(bb_model(img),dim=1)
       pred_label = torch.argmax(out_xs)
       true_label = torch.argmax(out_x)
-      # true_label = label
+      true_label = label
 # post hoc accuracy calc.
       if(true_label == pred_label):
           correct_count += 1
@@ -307,7 +282,7 @@ def train_basemodel(cls,trainloader,valloader,bb_model,LossFunc,optimizer,num_ep
         train_loss = []
         valid_loss = []
         
-  torch.save(bb_model,'_model.pt')
+  torch.save(bb_model,checkpoint_path+'_model.pt')
 
   return bb_model 
 
