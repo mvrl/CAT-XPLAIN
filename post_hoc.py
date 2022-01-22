@@ -52,7 +52,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validati
   print("For Experiment with sel_model:",sel_model_type)
   print('1. Training the Basemodel...... \n')
 
-  k = M*M-num_patches# number of patches for S_bar
+  k = M*M-int(num_patches)# number of patches for S_bar
   ## Initialize Base model
   if bb_model_type == 'ViT':
     bb_model =  ViT(
@@ -232,7 +232,7 @@ if  __name__ == '__main__':
     parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[fmnist, mnist]", default= 'mnist')
     parser.add_argument('--bb_model_type', type=str,help="Base_model type: Options:[ViT, ConvNet, MLPNet]",default="ViT")
     parser.add_argument('--sel_model_type', type=str,help="select_model type: Options:[ViT, ConvNet, MLPNet]",default="ViT")
-    parser.add_argument('--num_patches',  type=str,help="number of patches to select: Options[2,4,6,8,10]", default= "10")
+    parser.add_argument('--num_patches',  type=int,help="number of patches to select: Options[2,4,6,8,10]", default= 6)
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     parser.add_argument('--sweep', type=str,help="select_model type: Options:[sweep,no_sweep]",default="no_sweep")
     args = parser.parse_args()
@@ -240,7 +240,7 @@ if  __name__ == '__main__':
     validation = args.validation
     num_patches = int(args.num_patches)
     HyperParameters = edict()
-    HyperParameters.dataset_name = ["mnist", "fmnist", "imdb"]
+    HyperParameters.dataset_name = ["mnist", "fmnist"]
     HyperParameters.bb_model_type = ["ViT", "ConvNet", "MLPNet"]
     HyperParameters.sel_model_type = ["ViT", "ConvNet", "MLPNet"]
     HyperParameters.params = [HyperParameters.dataset_name, HyperParameters.bb_model_type,HyperParameters.sel_model_type]
@@ -251,7 +251,7 @@ if  __name__ == '__main__':
         bb_model_type = hp[1]
         sel_model_type = hp[2]
         print("For parameters:(dataset_name, BaseModel,Selector)",hp)
-        train_eval(dataset_name, bb_model_type, sel_model_type,validation)
+        train_eval(dataset_name, bb_model_type, sel_model_type,num_patches,validation)
     else:
       dataset_name = args.dataset_name
       bb_model_type = args.bb_model_type

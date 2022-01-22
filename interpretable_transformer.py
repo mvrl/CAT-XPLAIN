@@ -52,7 +52,7 @@ test_ice_list = []
 
 def train_eval(dataset_name,loss_weight,num_patches,validation):
   seed_initialize(seed = 12345)
-  k = M*M-num_patches# number of patches for S_bar
+  k = M*M-int(num_patches)# number of patches for S_bar
   ###################################### LOAD DATASET ######################################################
   cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize = load_dataset(dataset_name=dataset_name)
 
@@ -187,7 +187,7 @@ if  __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[fmnist, mnist]", default= 'mnist')
     parser.add_argument('--loss_weight',  type=str,help="weight assigned to selection loss", default= "0.9")
-    parser.add_argument('--num_patches',  type=str,help="number of patches to select: Options[2,4,6,8,10]", default= "10")
+    parser.add_argument('--num_patches',  type=int,help="number of patches to select: Options[2,4,6,8,10]", default= 6)
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     args = parser.parse_args()
     dataset_name = args.dataset_name

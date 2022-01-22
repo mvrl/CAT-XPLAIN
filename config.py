@@ -1,13 +1,12 @@
 import torch
 
 
-num_epochs_basemodel = 2
+num_epochs_basemodel = 10
 lr_basemodel = 0.0001 
 
 data_path = './checkpoints/'
 checkpoint_path = data_path
 # global variables
-dataset_name = 'mnist'
 batch_size = 64
 kwargs = {'batch_size':batch_size, 'num_workers':2, 'pin_memory':True}
 eps=1e-10
@@ -23,7 +22,7 @@ total_num_patches = 49
 M = 7 # selection map size(assuming a square shaped selection map) 
 N = 4 # patch size(square patch)
 tau = 0.1
-num_epochs = 2
+num_epochs = 10
 lr = 0.0001
 best_val_acc = 0
-num_init = 2 # number of initializations of the explainer
+num_init = 5 # number of initializations of the explainer
