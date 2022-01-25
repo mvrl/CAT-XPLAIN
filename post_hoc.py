@@ -3,7 +3,7 @@
 # importing local libraries
 # from utils import *
 # from models_file import BaseModel, gumbel_selector
-from models import ViT, ConvNet, MLPNet, ConvNet_selector
+from models import ViT, ConvNet, MLPNet, ConvNet_selector, initialize_model
 import itertools
 from easydict import EasyDict as edict
 
@@ -54,25 +54,8 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validati
 
   k = M*M-int(num_patches)# number of patches for S_bar
   ## Initialize Base model
-  if bb_model_type == 'ViT':
-    bb_model =  ViT(
-              image_size = 28,
-              patch_size = 4,
-              num_classes = num_classes,
-              channels = 1,
-              dim = 128,
-              depth = 2,
-              heads = 4,
-              mlp_dim = 256,
-              dropout = 0.1,
-              emb_dropout = 0.1).to(device)
-  if bb_model_type == 'ConvNet':
-    bb_model = ConvNet(num_logits=num_classes).to(device)
-  if bb_model_type == 'MLPNet':
-    bb_model = MLPNet(input_shape=input_shape,num_logits=num_classes).to(device)
+  bb_model = initialize_model(bb_model_type,num_classes,input_shape,device)
 
-  
-  
   LossFunc_basemodel = torch.nn.CrossEntropyLoss(size_average = True)
   optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
 
@@ -113,30 +96,14 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validati
   for iter_num in range(num_init):
     # intantiating the gumbel_selector or in other words initializing the explainer's weights
     ## Initialize Selection model
-    if sel_model_type == 'ViT':
-      selector =  ViT(
-                image_size = 28,
-                patch_size = 4,
-                num_classes = total_num_patches,
-                channels = 1,
-                dim = 128,
-                depth = 2,
-                heads = 4,
-                mlp_dim = 256,
-                dropout = 0.1,
-                emb_dropout = 0.1).to(device)
-    if sel_model_type == 'ConvNet':
-      selector = ConvNet(num_logits=total_num_patches).to(device)
-    if sel_model_type == 'MLPNet':
-      selector = MLPNet(input_shape=input_shape,num_logits=total_num_patches).to(device)
-
+    selector = initialize_model(sel_model_type,total_num_patches,input_shape,device)
     #optimizer
     optimizer = torch.optim.Adam(selector.parameters(),lr = lr)
     
+    val_accs = []
+    val_ices = []
     # training loop
     for epoch in range(num_epochs):  
-        val_accs = []
-        val_ices = []
         running_loss = 0
         for i, data in enumerate(trainloader, 0):
             # get the inputs
@@ -191,33 +158,24 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validati
     val_ice_list.append(val_ices[best_epoch])
     print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
     print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
+    
     best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_posthoc_selector.pt')
     ## Initialize Selection model
-    if sel_model_type == 'ViT':
-      best_model =  ViT(
-                image_size = 28,
-                patch_size = 4,
-                num_classes = total_num_patches,
-                channels = 1,
-                dim = 128,
-                depth = 2,
-                heads = 4,
-                mlp_dim = 256,
-                dropout = 0.1,
-                emb_dropout = 0.1).to(device)
-    if sel_model_type == 'ConvNet':
-      best_model = ConvNet(num_logits=total_num_patches).to(device)
-    if sel_model_type == 'MLPNet':
-      best_model = MLPNet(input_shape=input_shape,num_logits=total_num_patches).to(device)
-    
+    best_model = initialize_model(sel_model_type,total_num_patches,input_shape,device)
     checkpoint = torch.load(best_model_path)
     best_model.load_state_dict(checkpoint['model_state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+
+    ## Initialize base blackbox model
+    bb_checkpoint = torch.load(checkpoint_path+'_model.pt')
+    bb_model = initialize_model(bb_model_type,num_classes,input_shape,device)
+    bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
+    #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+
     test_acc,test_ice = metrics(cls,best_model,k,M,N,iter_num,testloader,imgs_with_random_patch_test,bb_model,intrinsic=False)
     
     if validation == 'with_test':
       print('test (ph acc, ICE):',(test_acc,test_ice))
-      
+
     test_acc_list.append(test_acc)
     test_ice_list.append(test_ice)
    

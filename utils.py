@@ -282,7 +282,11 @@ def train_basemodel(cls,trainloader,valloader,bb_model,LossFunc,optimizer,num_ep
         train_loss = []
         valid_loss = []
         
-  torch.save(bb_model,checkpoint_path+'_model.pt')
+  torch.save({
+            'epoch': epoch,
+            'model_state_dict': bb_model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            },checkpoint_path+'_model.pt')
 
   return bb_model 
 

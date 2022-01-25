@@ -249,3 +249,24 @@ class ConvNet_selector(nn.Module): # this class is obviously specific to the pro
         logits = self.c3(o2)
         
         return logits.view(bs,-1) #shape(bs, 49)
+
+
+def initialize_model(model_type,num_classes,input_shape,device):
+  if model_type == 'ViT':
+    model =  ViT(
+              image_size = 28,
+              patch_size = 4,
+              num_classes = num_classes,
+              channels = 1,
+              dim = 128,
+              depth = 2,
+              heads = 4,
+              mlp_dim = 256,
+              dropout = 0.1,
+              emb_dropout = 0.1).to(device)
+  if model_type == 'ConvNet':
+    model = ConvNet(num_logits=num_classes).to(device)
+  if model_type == 'MLPNet':
+    model = MLPNet(input_shape=input_shape,num_logits=num_classes).to(device)
+
+  return model
