@@ -169,6 +169,9 @@ def train_eval(dataset_name,loss_weight,num_patches,validation):
       optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
       test_acc,test_ice = metrics(cls, best_model,k,M,N,iter_num,testloader,imgs_with_random_patch_test,best_model,intrinsic=True)
       
+      if validation == 'with_test':
+        print('test (ph acc, ICE):',(test_acc,test_ice))
+
       test_acc_list.append(test_acc)
       test_ice_list.append(test_ice)
 
