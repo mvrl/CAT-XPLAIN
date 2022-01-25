@@ -174,6 +174,8 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validati
         val_acc,val_ice = metrics(cls,selector,k,M,N,iter_num,valloader,imgs_with_random_patch_val,bb_model)
         val_accs.append(val_acc)
         val_ices.append(val_ice)
+        if not os.path.exists(checkpoint_path):
+          os.makedirs(checkpoint_path)
         model_checkpoint = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(epoch)+'_posthoc_selector.pt')
         torch.save({
             'epoch': epoch,
