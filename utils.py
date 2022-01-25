@@ -203,7 +203,7 @@ def metrics(cls,selector,k,M,N,init_num,valloader,imgs_with_random_patch,bb_mode
             out_x = F.softmax(bb_model(img),dim=1)
       pred_label = torch.argmax(out_xs)
       true_label = torch.argmax(out_x)
-      true_label = label
+      #true_label = label
 # post hoc accuracy calc.
       if(true_label == pred_label):
           correct_count += 1
