@@ -2,8 +2,35 @@ name: CAT-XPLAIN
 channels:
   - pytorch
   - conda-forge
+  - defaults
 dependencies:
-  - pip
-  - python==3.8
+  - cudatoolkit=10.2.89
+  - matplotlib=3.4.3
+  - numpy=1.21.2
+  - opencv=4.4.0
+  - pip=21.2.4
+  - python=3.8.12
+  - pytorch=1.10.1
+  - scikit-image=0.18.1
+  - scikit-learn=1.0.1
+  - scipy=1.7.1
+  - torchaudio=0.10.1
+  - torchvision=0.11.2
+  - tornado=6.1
+  - tqdm=4.62.3
+  - yaml=0.2.5
+  - zip=3.0
+  - zipp=3.6.0
   - pip:
-    - -r requirements.txt 
+    - captum==0.4.0
+    - docopt==0.6.2
+    - easydict==1.9
+    - einops==0.3.2
+    - gdown==4.2.0
+    - pipreqs==0.4.11
+    - pytorchtools==0.0.2
+    - torch==1.10.1
+    - torchio==0.18.71
+    - torchtext==0.11.1
+    - wget==3.2
+

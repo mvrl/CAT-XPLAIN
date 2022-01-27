@@ -1,6 +1,5 @@
 import torch
 
-
 num_epochs_basemodel = 10
 lr_basemodel = 0.0001 
 

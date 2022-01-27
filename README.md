@@ -9,7 +9,7 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 1. `https://github.com/Subash33/CAT-XPLAIN`
 2. `cd CAT-XPLAIN`
 3. Create a virtual environment for the project.\
-`conda env create --file environment.yml`
+`conda env create -f environment.yml`
 4. `conda activate CAT-XPLAIN`
 5. Run the post-hoc experiment for MNIST or FMNIST datasets
 
