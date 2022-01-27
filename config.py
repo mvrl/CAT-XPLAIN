@@ -5,6 +5,9 @@ lr_basemodel = 0.0001
 
 data_path = './checkpoints/'
 checkpoint_path = data_path
+
+mri_data_path = '/u/vul-d1/scratch/subash/ADNI/Preprocessed'
+
 # global variables
 batch_size = 64
 kwargs = {'batch_size':batch_size, 'num_workers':2, 'pin_memory':True}

@@ -9,28 +9,28 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 1. `https://github.com/Subash33/CAT-XPLAIN`
 2. `cd CAT-XPLAIN`
 3. Create a virtual environment for the project.\
-`conda env create -f environment.yml`
-4. `conda activate CAT-XPLAIN`
+    `conda env create -f environment.yml`
+4.  `conda activate CAT-XPLAIN`
 5. Run the post-hoc experiment for MNIST or FMNIST datasets
 
-`python post_hoc.py --num_patches 6 --validation "with_test" --bb_model_type "ViT" --sel_model_type "ViT" --dataset_name "mnist"`
+    `python post_hoc.py --num_patches 6 --validation "with_test" --bb_model_type "ViT" --sel_model_type "ViT" --dataset_name "mnist"`
 
-`python post_hoc.py --num_patches 6 --validation "with_test" --bb_model_type "ViT" --sel_model_type "ViT" --dataset_name "fmnist"`
+    `python post_hoc.py --num_patches 6 --validation "with_test" --bb_model_type "ViT" --sel_model_type "ViT" --dataset_name "fmnist"`
 
 6. Run the Interpretable transformer for MNIST or FMNIST datasets
 
-`python interpretable_transformer.py --num_patches 6 --validation "with_test" --loss_weight 0.9 --dataset_name "mnist"`
+    `python interpretable_transformer.py --num_patches 6 --validation "with_test" --loss_weight 0.9 --dataset_name "mnist"`
 
-`python interpretable_transformer.py --num_patches 6 --validation "with_test" --loss_weight 0.9 --dataset_name "fmnist"`
+    `python interpretable_transformer.py --num_patches 6 --validation "with_test" --loss_weight 0.9 --dataset_name "fmnist"`
 
 ### Steps (for ADNI MRI dataset)
 
 1. Download ADNI data using the fileID provided after access request at subash.khanal33@gmail.com
-
-`gdown "https://drive.google.com/uc?id=FILEID"`\
-Note: Replace FILEID with the id of the zip file in my google drive, provided after contacting for data access.\
-
-2. Post-hoc
-3. Interpretable
+    `gdown -O "/u/vul-d1/scratch/subash/ADNI.zip" --id "1C7y9nviFU4HCtthKOPBLjvvxBhLKI511"`\
+    Note: Replace FILEID with the id of the zip file in my google drive, provided after contacting for data access. Replace "/u/vul-d1/scratch/subash/ADNI.zip" with your storage_path/filename.zip
+2. Unzip the file
+    `unzip /u/vul-d1/scratch/subash/ADNI.zip -d /u/vul-d1/scratch/subash/`
+3. Post-hoc
+4. Interpretable
 
 
