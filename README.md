@@ -27,11 +27,11 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 
 1. Download ADNI data using the fileID provided after access request at subash.khanal33@gmail.com
     
-    `gdown -O "storage_path/ADNI.zip" --id "1C7y9nviFU4HCtthKOPBLjvvxBhLKI511"`\
+    `gdown -O "storage_path/ADNI.zip" --id "1C7y9nviFU4HCtthKOPBLjvvxBhLKI511"`
 
 2. Unzip the file
 
-    `unzip storage_path/ADNI.zip -d storage_path`\
+    `unzip storage_path/ADNI.zip -d storage_path`
 
 3. Post-hoc
 4. Interpretable
