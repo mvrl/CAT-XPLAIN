@@ -26,10 +26,13 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 ### Steps (for ADNI MRI dataset)
 
 1. Download ADNI data using the fileID provided after access request at subash.khanal33@gmail.com
-    `gdown -O "/u/vul-d1/scratch/subash/ADNI.zip" --id "1C7y9nviFU4HCtthKOPBLjvvxBhLKI511"`\
-    Note: Replace FILEID with the id of the zip file in my google drive, provided after contacting for data access. Replace "/u/vul-d1/scratch/subash/ADNI.zip" with your storage_path/filename.zip
+    
+    `gdown -O "storage_path/ADNI.zip" --id "1C7y9nviFU4HCtthKOPBLjvvxBhLKI511"`\
+
 2. Unzip the file
-    `unzip /u/vul-d1/scratch/subash/ADNI.zip -d /u/vul-d1/scratch/subash/`
+
+    `unzip storage_path/ADNI.zip -d storage_path`\
+
 3. Post-hoc
 4. Interpretable
 
