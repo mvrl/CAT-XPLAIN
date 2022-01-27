@@ -1,0 +1,9 @@
+name: CAT-XPLAIN
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - pip
+  - python==3.8
+  - pip:
+    - -r requirements.txt 
