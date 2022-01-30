@@ -3,7 +3,7 @@
 # importing local libraries
 # from utils import *
 # from models_file import BaseModel, gumbel_selector
-from models import ViT, ConvNet, MLPNet, ConvNet_selector, initialize_model
+from models import ViT, initialize_model
 import itertools
 from easydict import EasyDict as edict
 
@@ -44,7 +44,7 @@ np.random.seed(SEED)
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
 
-
+import sys
 def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validation='without_test'):
   cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize = load_dataset(dataset_name=dataset_name)
   print("For dataset:",dataset_name)
@@ -52,10 +52,12 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validati
   print("For Experiment with sel_model:",sel_model_type)
   print('1. Training the Basemodel...... \n')
 
+  input_dim = 28
   num_patches = int(num_patches*M*M)
   k = M*M-int(num_patches)# number of patches for S_bar
+  
   ## Initialize Base model
-  bb_model = initialize_model(bb_model_type,num_classes,input_shape,device)
+  bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)
 
   LossFunc_basemodel = torch.nn.CrossEntropyLoss(size_average = True)
   optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
@@ -67,7 +69,8 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validati
                 LossFunc_basemodel,
                 optimizer_basemodel,
                 num_epochs_basemodel,
-                kwargs['batch_size'])
+                kwargs['batch_size'],
+                checkpoint_path)
 
   # testing the model on held-out validation dataset
   if validation == 'without_test':
@@ -97,7 +100,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validati
   for iter_num in range(num_init):
     # intantiating the gumbel_selector or in other words initializing the explainer's weights
     ## Initialize Selection model
-    selector = initialize_model(sel_model_type,total_num_patches,input_shape,device)
+    selector = initialize_model(sel_model_type,num_classes=M*M,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)
     #optimizer
     optimizer = torch.optim.Adam(selector.parameters(),lr = lr)
     
@@ -162,13 +165,13 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validati
     
     best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_posthoc_selector.pt')
     ## Initialize Selection model
-    best_model = initialize_model(sel_model_type,total_num_patches,input_shape,device)
+    best_model = initialize_model(sel_model_type,num_classes=M*M,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)
     checkpoint = torch.load(best_model_path)
     best_model.load_state_dict(checkpoint['model_state_dict'])
 
     ## Initialize base blackbox model
     bb_checkpoint = torch.load(checkpoint_path+'_model.pt')
-    bb_model = initialize_model(bb_model_type,num_classes,input_shape,device)
+    bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 

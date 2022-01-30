@@ -234,7 +234,7 @@ def metrics(cls,selector,k,M,N,init_num,valloader,imgs_with_random_patch,bb_mode
   return ph_acc,ACE.cpu()
 
 
-def train_basemodel(cls,trainloader,valloader,bb_model,LossFunc,optimizer,num_epochs,batch_size):
+def train_basemodel(cls,trainloader,valloader,bb_model,LossFunc,optimizer,num_epochs,batch_size,checkpoint_path):
   train_loss = []
   valid_loss = []
   avg_train_losses = []

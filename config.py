@@ -2,7 +2,7 @@ import torch
 from easydict import EasyDict as edict
 cfg = edict()
 
-num_epochs_basemodel = 10
+num_epochs_basemodel = 2
 lr_basemodel = 0.0001 
 
 data_path = './checkpoints/'
@@ -27,10 +27,10 @@ total_num_patches = 7*7
 M = 7 # selection map size(assuming a square shaped selection map) 
 N = 4 # patch size(square patch)
 tau = 0.1
-num_epochs = 10
+num_epochs = 2
 lr = 0.0001
 best_val_acc = 0
-num_init = 5 # number of initializations of the explainer
+num_init = 2 # number of initializations of the explainer
 
 
 ## For MRI data

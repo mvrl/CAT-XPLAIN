@@ -209,7 +209,7 @@ def initialize_model(model_type,num_classes,input_dim,patch_size,dim,depth,heads
               dropout = 0.1,
               emb_dropout = 0.1).to(device)
     if model_type == 'expViT':
-        modifiedViT(
+        model = modifiedViT(
               image_size = input_dim,
               patch_size = patch_size,
               num_classes = num_classes,
@@ -221,4 +221,4 @@ def initialize_model(model_type,num_classes,input_dim,patch_size,dim,depth,heads
               dropout = 0.1,
               emb_dropout = 0.1,
               explain = True).to(device)
-  return model
+    return model

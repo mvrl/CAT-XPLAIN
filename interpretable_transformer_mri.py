@@ -41,28 +41,29 @@ print(np.version.version)
 print(torch.__version__)
 print(device)
 
-val_acc_list = []
-val_ice_list = []
-
-test_acc_list = []
-test_ice_list = []
-
-
 def train_eval(dataset_name,view_type,loss_weight,num_patches,validation):
   cls = [0,1]
+  groups = 'CN_AD'
   seed_initialize(seed = 12345)
-  num_patches = int(num_patches*M*M)
-  k = M*M-int(num_patches)# number of patches for S_bar
   M = 19
   N = 10
+  num_patches = int(num_patches*M*M)
+  k = M*M-int(num_patches)# number of patches for S_bar
   input_shape = (1,190,190)
   input_dim = 190
   LABEL_PATH = cfg.folds
   TEST_LABEL = cfg.test_csv
   checkpoint_path = cfg.checkpoint
+  batch_size = 16
   
   print("For dataset:",dataset_name)
   print("For viewtype:",view_type)
+
+  val_acc_list = []
+  val_ice_list = []
+
+  test_acc_list = []
+  test_ice_list = []
   ######################################################################################################################################################
   #                                             MAIN TRAINING CODE                                                                                     #
   ######################################################################################################################################################
@@ -97,7 +98,7 @@ def train_eval(dataset_name,view_type,loss_weight,num_patches,validation):
 
       # intantiating the interpretable transformer
       model_type = 'expViT'
-      bb_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)
+      bb_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device).float()
       selector = bb_model
       LossFunc = torch.nn.CrossEntropyLoss(size_average = True)
       #optimizer
@@ -192,7 +193,7 @@ if  __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[mri]", default= 'mri')
-    parser.add_argument('--view_type', type=str, help='View type either for Single View or MultiView Options: [0 or 1 or 2]', default='1')
+    parser.add_argument('--view_type', type=str, help='View type either for Single View or MultiView Options: [0 or 1 or 2 or multi]', default='1')
     parser.add_argument('--loss_weight',  type=str,help="weight assigned to selection loss", default= "0.9")
     parser.add_argument('--num_patches',  type=float,help="frac for number of patches to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")

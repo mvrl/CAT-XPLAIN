@@ -17,7 +17,7 @@ import random
 from joblib import dump, load
 from tqdm import tqdm
 from torch.utils.data import DataLoader, Sampler, SubsetRandomSampler
-from models import modifiedViT
+from models import modifiedViT, initialize_model
 from utils import sample_concrete, custom_loss, generate_xs, metrics, imgs_with_random_patch_generator, load_dataset
 from config import *
 import os
@@ -73,20 +73,21 @@ def train_eval(dataset_name,loss_weight,num_patches,validation):
   # training loop where we run the experiments for multiple times and report the 
   # mean and standard deviation of the metrics ph_acc and ICE.
   for iter_num in range(num_init):
-      
+      model_type = 'expViT'
+      bb_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)
       # intantiating the interpretable transformer
-      bb_model = modifiedViT(
-              image_size = 28,
-              patch_size = 4,
-              num_classes = num_classes,
-              channels = 1,
-              dim = 128,
-              depth = 2,
-              heads = 4,
-              mlp_dim = 256,
-              dropout = 0.1,
-              emb_dropout = 0.1,
-              explain = True).to(device)
+      # bb_model = modifiedViT(
+      #         image_size = 28,
+      #         patch_size = 4,
+      #         num_classes = num_classes,
+      #         channels = 1,
+      #         dim = 128,
+      #         depth = 2,
+      #         heads = 4,
+      #         mlp_dim = 256,
+      #         dropout = 0.1,
+      #         emb_dropout = 0.1,
+      #         explain = True).to(device)
       selector = bb_model
       LossFunc = torch.nn.CrossEntropyLoss(size_average = True)
       #optimizer
@@ -153,18 +154,19 @@ def train_eval(dataset_name,loss_weight,num_patches,validation):
       print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
       print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
       best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector.pt')
-      best_model = modifiedViT(
-              image_size = 28,
-              patch_size = 4,
-              num_classes = num_classes,
-              channels = 1,
-              dim = 128,
-              depth = 2,
-              heads = 4,
-              mlp_dim = 256,
-              dropout = 0.1,
-              emb_dropout = 0.1,
-              explain = True).to(device)
+      best_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)
+      # best_model = modifiedViT(
+      #         image_size = 28,
+      #         patch_size = 4,
+      #         num_classes = num_classes,
+      #         channels = 1,
+      #         dim = 128,
+      #         depth = 2,
+      #         heads = 4,
+      #         mlp_dim = 256,
+      #         dropout = 0.1,
+      #         emb_dropout = 0.1,
+      #         explain = True).to(device)
       checkpoint = torch.load(best_model_path)
       best_model.load_state_dict(checkpoint['model_state_dict'])
       optimizer.load_state_dict(checkpoint['optimizer_state_dict'])

@@ -36,7 +36,7 @@ def prep_tensor(im,random_patch,num_patches,M,N):
     
     im = np.expand_dims(im, axis=0) # Creating a channel dim at axis =0 as required by pytorch
     
-    return im
+    return torch.tensor(im).float()
     
 
 def prep_data(LABEL_PATH ,exper_path,TEST_NUM, groups):
@@ -68,8 +68,8 @@ class Dataset_MRI(Dataset):
     def __init__(self,
                  label_file,
                  groups,
-                 view_type = '1', #Options: ['0' or '1' or '2']
-                 precision = 'half',
+                 view_type = '1', #Options: ['0' or '1' or '2' or 'multi']
+                 precision = 'full',
                  random_patch=True, 
                  M = 19, #Number of patches in one axis of image
                  N = 10, #patch dimension
@@ -122,7 +122,18 @@ class Dataset_MRI(Dataset):
             im = im[:,:,middle_slice] #Shape (190,190)
             im =  prep_tensor(im,self.random_patch,self.num_patches,self.M,self.N)
 
-        if self.precision == 'half':
-            return torch.tensor(im, dtype=torch.float16),int(label) # output image shape [C,W,H]
-        else:
+        if self.view_type != 'multi':
             return torch.tensor(im), int(label) # output image shape [C,W,H]
+
+        if self.view_type == 'multi':
+            im0 = im[middle_slice,:,:]
+            im0 =  prep_tensor(im0,self.random_patch,self.num_patches,self.M,self.N)
+
+            im1 = im[:,middle_slice,:]
+            im1 =  prep_tensor(im1,self.random_patch,self.num_patches,self.M,self.N)
+
+            im2 =  im[:,:,middle_slice]
+            im2 =  prep_tensor(im2,self.random_patch,self.num_patches,self.M,self.N)
+
+            return torch.tensor(im0), torch.tensor(im1), torch.tensor(im2), int(label)
+
