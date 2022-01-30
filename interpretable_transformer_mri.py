@@ -5,8 +5,7 @@ import numpy as np
 import torch
 import torchvision
 import torch.utils.data as data
-from torchvision import datasets as vision_datasets
-from torchtext import datasets as text_datasets
+from mri_dataloader import prep_data, Dataset_MRI
 from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
 from time import time
@@ -17,7 +16,7 @@ import random
 from joblib import dump, load
 from tqdm import tqdm
 from torch.utils.data import DataLoader, Sampler, SubsetRandomSampler
-from models import modifiedViT
+from models import modifiedViT, initialize_model
 from utils import sample_concrete, custom_loss, generate_xs, metrics, imgs_with_random_patch_generator, load_dataset
 from config import *
 import os
@@ -50,22 +49,20 @@ test_acc_list = []
 test_ice_list = []
 
 
-def train_eval(dataset_name,loss_weight,num_patches,validation):
+def train_eval(dataset_name,view_type,loss_weight,num_patches,validation):
+  cls = [0,1]
   seed_initialize(seed = 12345)
   num_patches = int(num_patches*M*M)
   k = M*M-int(num_patches)# number of patches for S_bar
-  ###################################### LOAD DATASET ######################################################
-  cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize = load_dataset(dataset_name=dataset_name)
-
-  ##########################################################################################################################################################
-  ################################################# RANDOM PATCH SELECTED DATASET CREATOR ##################################################################
-  '''
-  to generate images with random patches selected
-  '''
-
-  imgs_with_random_patch_val = imgs_with_random_patch_generator(valloader,valid_datasize,num_patches)
-  imgs_with_random_patch_test = imgs_with_random_patch_generator(testloader,test_datasize,num_patches)
-
+  M = 19
+  N = 10
+  input_shape = (1,190,190)
+  input_dim = 190
+  LABEL_PATH = cfg.folds
+  TEST_LABEL = cfg.test_path
+  checkpoint_path = cfg.checkpoint
+  
+  
   ######################################################################################################################################################
   #                                             MAIN TRAINING CODE                                                                                     #
   ######################################################################################################################################################
@@ -73,20 +70,32 @@ def train_eval(dataset_name,loss_weight,num_patches,validation):
   # training loop where we run the experiments for multiple times and report the 
   # mean and standard deviation of the metrics ph_acc and ICE.
   for iter_num in range(num_init):
-      
+      TEST_NUM = iter_num
+      exper_path = os.path.join(checkpoint_path,'iter'+str(iter_num))
+      if not os.path.exists(exper_path):
+          os.makedirs(exper_path)
+      TRAIN_LABEL, VAL_LABEL = prep_data(LABEL_PATH ,exper_path,TEST_NUM, groups)
+      train_dataset = Dataset_MRI(label_file=TRAIN_LABEL,groups='CN_AD',view_type=view_type,random_patch=False,M=M,N=N,num_patches=num_patches)
+      trainloader = torch.utils.data.DataLoader(train_dataset, num_workers=8, batch_size=batch_size, shuffle=True, drop_last=True)
+
+      val_dataset = Dataset_MRI(label_file=VAL_LABEL,groups='CN_AD',view_type=view_type,random_patch=False,M=M,N=N,num_patches=num_patches)
+      valloader = torch.utils.data.DataLoader(val_dataset, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+
+      test_dataset = Dataset_MRI(label_file=TEST_LABEL,groups='CN_AD',view_type=view_type,random_patch=False,M=M,N=N,num_patches=num_patches)
+      testloader = torch.utils.data.DataLoader(test_dataset, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+
+      '''
+      generate images with random patches selected for calculating the ACE metric
+      '''
+      val_dataset_random = Dataset_MRI(label_file=VAL_LABEL,groups='CN_AD',view_type=view_type,random_patch=True,M=M,N=N,num_patches=num_patches)
+      imgs_with_random_patch_val = torch.utils.data.DataLoader(val_dataset_random, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+
+      test_dataset_random = Dataset_MRI(label_file=TEST_LABEL,groups='CN_AD',view_type=view_type,random_patch=True,M=M,N=N,num_patches=num_patches)
+      imgs_with_random_patch_test = torch.utils.data.DataLoader(test_dataset_random, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+
       # intantiating the interpretable transformer
-      bb_model = modifiedViT(
-              image_size = 28,
-              patch_size = 4,
-              num_classes = num_classes,
-              channels = 1,
-              dim = 128,
-              depth = 2,
-              heads = 4,
-              mlp_dim = 256,
-              dropout = 0.1,
-              emb_dropout = 0.1,
-              explain = True).to(device)
+      model_type = 'expViT'
+      bb_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)
       selector = bb_model
       LossFunc = torch.nn.CrossEntropyLoss(size_average = True)
       #optimizer
@@ -153,18 +162,7 @@ def train_eval(dataset_name,loss_weight,num_patches,validation):
       print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
       print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
       best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector.pt')
-      best_model = modifiedViT(
-              image_size = 28,
-              patch_size = 4,
-              num_classes = num_classes,
-              channels = 1,
-              dim = 128,
-              depth = 2,
-              heads = 4,
-              mlp_dim = 256,
-              dropout = 0.1,
-              emb_dropout = 0.1,
-              explain = True).to(device)
+      best_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)
       checkpoint = torch.load(best_model_path)
       best_model.load_state_dict(checkpoint['model_state_dict'])
       optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -191,13 +189,15 @@ if  __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[fmnist, mnist]", default= 'mnist')
+    parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[mri]", default= 'mri')
+    parser.add_argument('--view_type', type=str, help='View type either for Single View or MultiView Options: [0 or 1 or 2]', default='1')
     parser.add_argument('--loss_weight',  type=str,help="weight assigned to selection loss", default= "0.9")
-    parser.add_argument('--num_patches',  type=str,help="frac for number of patches to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
+    parser.add_argument('--num_patches',  type=float,help="frac for number of patches to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     args = parser.parse_args()
     dataset_name = args.dataset_name
+    view_type = args.view_type
     num_patches = float(args.num_patches)
     loss_weight = float(args.loss_weight)
     validation = args.validation  
-    train_eval(dataset_name,loss_weight,num_patches,validation)
+    train_eval(dataset_name,view_type,loss_weight,num_patches,validation)

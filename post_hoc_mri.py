@@ -1,9 +1,6 @@
 # ## Most of the code below is taken from: https://github.com/pranoy-panda/Causal-Feature-Subset-Selection
 
-# importing local libraries
-# from utils import *
-# from models_file import BaseModel, gumbel_selector
-from models import ViT, ConvNet, MLPNet, ConvNet_selector, initialize_model
+from models import ViT, initialize_model
 import itertools
 from easydict import EasyDict as edict
 
@@ -12,8 +9,7 @@ import numpy as np
 import torch
 import torchvision
 import torch.utils.data as data
-from torchvision import datasets as vision_datasets
-from torchtext import datasets as text_datasets
+from mri_dataloader import prep_data, Dataset_MRI
 from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
 from time import time
@@ -45,9 +41,19 @@ torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
 
 
-def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validation='without_test'):
-  cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize = load_dataset(dataset_name=dataset_name)
+def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,num_patches,validation='without_test'):
+  cls = [0,1]
+  M = 19
+  N = 10
+  input_shape = (1,190,190)
+  input_dim = 190
+  LABEL_PATH = cfg.folds
+  TEST_LABEL = cfg.test_path
+  checkpoint_path = cfg.checkpoint
+  
+  
   print("For dataset:",dataset_name)
+  print("For viewtype:",view_type)
   print("For Experiment with bb_model:",bb_model_type)
   print("For Experiment with sel_model:",sel_model_type)
   print('1. Training the Basemodel...... \n')
@@ -55,39 +61,6 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validati
   num_patches = int(num_patches*M*M)
   k = M*M-int(num_patches)# number of patches for S_bar
   ## Initialize Base model
-  bb_model = initialize_model(bb_model_type,num_classes,input_shape,device)
-
-  LossFunc_basemodel = torch.nn.CrossEntropyLoss(size_average = True)
-  optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
-
-  # train the basemodel 
-  bb_model = train_basemodel(cls,trainloader,
-                valloader,
-                bb_model,
-                LossFunc_basemodel,
-                optimizer_basemodel,
-                num_epochs_basemodel,
-                kwargs['batch_size'])
-
-  # testing the model on held-out validation dataset
-  if validation == 'without_test':
-    test_basemodel(cls,valloader,bb_model)
-  else:
-    test_basemodel(cls,testloader,bb_model)
-  print('Basemodel trained! \n')
-
-  ##############################################################
-
-  print('2. Starting main feature selection algorithm......... \n')
-
-  '''
-  generate images with random patches selected for calculating the ACE metric
-  '''
-  imgs_with_random_patch_val = imgs_with_random_patch_generator(valloader,valid_datasize,num_patches)
-  imgs_with_random_patch_test = imgs_with_random_patch_generator(testloader,test_datasize,num_patches)     
-
-  # training loop where we run the experiments for multiple times and report the 
-# mean and standard deviation of the metrics ph_acc and ICE.
   test_acc_list = []
   test_ice_list = []
 
@@ -95,9 +68,60 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_patches,validati
   val_ice_list = []
 
   for iter_num in range(num_init):
-    # intantiating the gumbel_selector or in other words initializing the explainer's weights
+
+    TEST_NUM = iter_num
+    exper_path = os.path.join(checkpoint_path,'iter'+str(iter_num))
+    if not os.path.exists(exper_path):
+        os.makedirs(exper_path)
+    TRAIN_LABEL, VAL_LABEL = prep_data(LABEL_PATH ,exper_path,TEST_NUM, groups)
+    train_dataset = Dataset_MRI(label_file=TRAIN_LABEL,groups='CN_AD',random_patch=False,M=M,N=N,num_patches=num_patches)
+    trainloader = torch.utils.data.DataLoader(train_dataset, num_workers=8, batch_size=batch_size, shuffle=True, drop_last=True)
+
+    val_dataset = Dataset_MRI(label_file=VAL_LABEL,groups='CN_AD',random_patch=False,M=M,N=N,num_patches=num_patches)
+    valloader = torch.utils.data.DataLoader(val_dataset, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+
+    test_dataset = Dataset_MRI(label_file=TEST_LABEL,groups='CN_AD',random_patch=False,M=M,N=N,num_patches=num_patches)
+    testloader = torch.utils.data.DataLoader(test_dataset, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+
+    bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)  
+    
+
+    LossFunc_basemodel = torch.nn.CrossEntropyLoss(size_average = True)
+    optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
+
+    # train the basemodel 
+    bb_model = train_basemodel(cls,trainloader,
+                  valloader,
+                  bb_model,
+                  LossFunc_basemodel,
+                  optimizer_basemodel,
+                  num_epochs_basemodel,
+                  kwargs['batch_size'])
+
+    # testing the model on held-out validation dataset
+    if validation == 'without_test':
+      test_basemodel(cls,valloader,bb_model)
+    else:
+      test_basemodel(cls,testloader,bb_model)
+    print('Basemodel trained! \n')
+
+    ##############################################################
+
+    print('2. Starting main feature selection algorithm......... \n')
+
+    '''
+    generate images with random patches selected for calculating the ACE metric
+    '''
+    val_dataset_random = Dataset_MRI(label_file=VAL_LABEL,groups='CN_AD',view_type=view_type,random_patch=True,M=M,N=N,num_patches=num_patches)
+    imgs_with_random_patch_val = torch.utils.data.DataLoader(val_dataset_random, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+
+    test_dataset_random = Dataset_MRI(label_file=TEST_LABEL,groups='CN_AD',view_type=view_type,random_patch=True,M=M,N=N,num_patches=num_patches)
+    imgs_with_random_patch_test = torch.utils.data.DataLoader(test_dataset_random, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+
+  # training loop where we run the experiments for multiple times and report the 
+# mean and standard deviation of the metrics ph_acc and ICE.
     ## Initialize Selection model
-    selector = initialize_model(sel_model_type,total_num_patches,input_shape,device)
+    selector = initialize_model(sel_model_type,num_classes=M*M,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)
     #optimizer
     optimizer = torch.optim.Adam(selector.parameters(),lr = lr)
     
@@ -193,34 +217,22 @@ if  __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[fmnist, mnist]", default= 'mnist')
-    parser.add_argument('--bb_model_type', type=str,help="Base_model type: Options:[ViT, ConvNet, MLPNet]",default="ViT")
-    parser.add_argument('--sel_model_type', type=str,help="select_model type: Options:[ViT, ConvNet, MLPNet]",default="ViT")
+    parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[mri]", default= 'mri')
+    parser.add_argument('--view_type', type=str, help='View type either for Single View or MultiView Options: [0 or 1 or 2]', default='1')
+    parser.add_argument('--bb_model_type', type=str,help="Base_model type: Options:[ViT]",default="ViT")
+    parser.add_argument('--sel_model_type', type=str,help="select_model type: Options:[ViT]",default="ViT")
     parser.add_argument('--num_patches',  type=str,help="frac for number of patches to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     parser.add_argument('--sweep', type=str,help="select_model type: Options:[sweep,no_sweep]",default="no_sweep")
     args = parser.parse_args()
-
     validation = args.validation
     num_patches = float(args.num_patches)
-    HyperParameters = edict()
-    HyperParameters.dataset_name = ["mnist", "fmnist"]
-    HyperParameters.bb_model_type = ["ViT", "ConvNet", "MLPNet"]
-    HyperParameters.sel_model_type = ["ViT", "ConvNet", "MLPNet"]
-    HyperParameters.params = [HyperParameters.dataset_name, HyperParameters.bb_model_type,HyperParameters.sel_model_type]
-    params = list(itertools.product(*HyperParameters.params))
-    if args.sweep == "sweep":
-      for hp in params:
-        dataset_name = hp[0]
-        bb_model_type = hp[1]
-        sel_model_type = hp[2]
-        print("For parameters:(dataset_name, BaseModel,Selector)",hp)
-        train_eval(dataset_name, bb_model_type, sel_model_type,num_patches,validation)
-    else:
-      dataset_name = args.dataset_name
-      bb_model_type = args.bb_model_type
-      sel_model_type = args.sel_model_type
-      train_eval(dataset_name, bb_model_type, sel_model_type,num_patches,validation)
+    dataset_name = args.dataset_name
+    view_type = args.view_type
+    bb_model_type = args.bb_model_type
+    sel_model_type = args.sel_model_type
+    train_eval(dataset_name, view_type, bb_model_type, sel_model_type,num_patches,validation)
+  
 
 
 

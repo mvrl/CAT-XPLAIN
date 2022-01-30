@@ -194,68 +194,12 @@ class modifiedViT(nn.Module):
         x = self.to_latent(x) #to_latent is just a placeholder for now,i.e no extra MLP layers except MLP head
         return self.cls_mlp_head(x), self.exp_mlp_head(mask)
 
-# Option 2:
-# ConvNet
 
-class ConvNet(nn.Module):
-    def __init__(self,num_logits,k=5):
-        super(ConvNet, self).__init__()
-        self.num_logits = num_logits
-        self.c1 = nn.Sequential(nn.Conv2d(1, 8, k, bias=True), nn.MaxPool2d(2), nn.ReLU())
-        self.c2 = nn.Sequential(nn.Conv2d(8, 16, k, bias=True), nn.MaxPool2d(2), nn.ReLU())
-        self.dropout = nn.Dropout(0.5)
-        self.fc = nn.Linear(4*4*16, self.num_logits) #conv without padding
-    def forward(self, x):
-        bs = x.size(0)
-        o1 = self.c1(x)
-        o2 = self.c2(o1)
-        # x = self.dropout(x)
-        out = self.fc(o2.view(bs,-1))
-        return out
-
-
-# Option 3:
-#MLP
-class MLPNet(nn.Module):
-    def __init__(self,input_shape,num_logits):
-        super(MLPNet, self).__init__()
-        self.input_shape = input_shape
-        self.pixels = self.input_shape[0]*self.input_shape[1]*self.input_shape[2]
-        self.num_logits = num_logits
-        self.fc1 = nn.Sequential(nn.Linear(self.pixels, self.pixels//2, bias=True), nn.ReLU())
-        self.fc2 = nn.Sequential(nn.Linear(self.pixels//2, self.pixels//4, bias=True), nn.ReLU())
-        self.dropout = nn.Dropout(0.5)
-        self.fc = nn.Linear(self.pixels//4, self.num_logits) 
-    def forward(self, x):
-        bs = x.size(0)
-        x = x.view(bs,-1)
-        o1 = self.fc1(x)
-        o2 = self.fc2(o1)
-        # x = self.dropout(x)
-        out = self.fc(o2.view(bs,-1))
-        return out
-
-class ConvNet_selector(nn.Module): # this class is obviously specific to the problem statement that we have
-    #takes input 1x28x28 (single channel)
-    def __init__(self, k=5):
-        super(ConvNet_selector, self).__init__()
-        self.c1 = nn.Sequential(nn.Conv2d(1,8,k, padding=2), nn.MaxPool2d(2), nn.ReLU())
-        self.c2 = nn.Sequential(nn.Conv2d(8,16,k, padding=2), nn.MaxPool2d(2), nn.ReLU())        
-        self.c3 = nn.Conv2d(16,1,1)
-    def forward(self, x):
-        bs = x.size(0)
-        o1 = self.c1(x)
-        o2 = self.c2(o1)
-        logits = self.c3(o2)
-        
-        return logits.view(bs,-1) #shape(bs, 49)
-
-
-def initialize_model(model_type,num_classes,input_shape,device):
-  if model_type == 'ViT':
-    model =  ViT(
-              image_size = 28,
-              patch_size = 4,
+def initialize_model(model_type,num_classes,input_dim,patch_size,dim,depth,heads,mlp_dim,device):
+    if model_type == 'ViT':
+        model =  ViT(
+              image_size = input_dim,
+              patch_size = patch_size,
               num_classes = num_classes,
               channels = 1,
               dim = 128,
@@ -264,9 +208,17 @@ def initialize_model(model_type,num_classes,input_shape,device):
               mlp_dim = 256,
               dropout = 0.1,
               emb_dropout = 0.1).to(device)
-  if model_type == 'ConvNet':
-    model = ConvNet(num_logits=num_classes).to(device)
-  if model_type == 'MLPNet':
-    model = MLPNet(input_shape=input_shape,num_logits=num_classes).to(device)
-
+    if model_type == 'expViT':
+        modifiedViT(
+              image_size = input_dim,
+              patch_size = patch_size,
+              num_classes = num_classes,
+              channels = 1,
+              dim = 128,
+              depth = 2,
+              heads = 4,
+              mlp_dim = 256,
+              dropout = 0.1,
+              emb_dropout = 0.1,
+              explain = True).to(device)
   return model
