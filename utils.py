@@ -99,6 +99,21 @@ def imgs_with_random_patch_generator(valloader,no_datapoints,num_patches):
     img_count = 0   
 
   return imgs_with_random_patch
+
+def imgs_with_random_patch_generator_mri(valloader,no_datapoints,num_patches):
+  #the random patch selection already done, this function just for compatability reason with existing code
+  num_validation_images = no_datapoints
+  img_size =  next(iter(valloader))[0].shape[-1]
+  imgs_with_random_patch = np.zeros((num_init,num_validation_images,img_size,img_size))
+  img_count = 0 
+  for i in range(num_init):
+    for images,_ in valloader:
+      for j in range(len(images)): 
+        imgs_with_random_patch[i][img_count] = images[j]
+        img_count+=1 # updating image count
+    img_count = 0   
+
+  return imgs_with_random_patch
 ######################################################################################################
 
 # This cell implements the real code i.e. where the explainer(gumbel_selector()) is trained

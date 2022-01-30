@@ -19,9 +19,7 @@ import torch.nn.functional as F
 import random
 from joblib import dump, load
 from tqdm import tqdm
-from torch.utils.data import DataLoader, Sampler, SubsetRandomSampler
-# from models2 import modifiedViT
-from utils import sample_concrete, custom_loss, generate_xs, metrics, imgs_with_random_patch_generator, load_dataset
+from utils import sample_concrete, custom_loss, generate_xs, metrics, imgs_with_random_patch_generator_mri
 from config import *
 import os
 from utils import train_basemodel, test_basemodel
@@ -31,24 +29,27 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-# set the seeds for reproducibility
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = False
-SEED = 12345
-random.seed(SEED) 
-np.random.seed(SEED)
-torch.manual_seed(SEED)
-torch.cuda.manual_seed(SEED)
+def seed_initialize(seed = 12345):
+  ######
+  # set the seeds for reproducibility
+  torch.backends.cudnn.deterministic = True
+  torch.backends.cudnn.benchmark = False
+  SEED = seed
+  random.seed(SEED) 
+  np.random.seed(SEED)
+  torch.manual_seed(SEED)
+  torch.cuda.manual_seed(SEED)
 
 
 def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,num_patches,validation='without_test'):
+  seed_initialize(seed = 12345)
   cls = [0,1]
   M = 19
   N = 10
   input_shape = (1,190,190)
   input_dim = 190
   LABEL_PATH = cfg.folds
-  TEST_LABEL = cfg.test_path
+  TEST_LABEL = cfg.test_csv
   checkpoint_path = cfg.checkpoint
   
   
@@ -68,7 +69,7 @@ def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,num_patches,v
   val_ice_list = []
 
   for iter_num in range(num_init):
-
+    batch_size = 16 #Not 64 like for MNIST of FMNIST
     TEST_NUM = iter_num
     exper_path = os.path.join(checkpoint_path,'iter'+str(iter_num))
     if not os.path.exists(exper_path):
@@ -85,7 +86,6 @@ def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,num_patches,v
 
     bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)  
     
-
     LossFunc_basemodel = torch.nn.CrossEntropyLoss(size_average = True)
     optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
 
@@ -96,7 +96,7 @@ def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,num_patches,v
                   LossFunc_basemodel,
                   optimizer_basemodel,
                   num_epochs_basemodel,
-                  kwargs['batch_size'])
+                  batch_size)
 
     # testing the model on held-out validation dataset
     if validation == 'without_test':
@@ -114,12 +114,14 @@ def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,num_patches,v
     '''
     val_dataset_random = Dataset_MRI(label_file=VAL_LABEL,groups='CN_AD',view_type=view_type,random_patch=True,M=M,N=N,num_patches=num_patches)
     imgs_with_random_patch_val = torch.utils.data.DataLoader(val_dataset_random, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+    imgs_with_random_patch_val = imgs_with_random_patch_generator_mri(imgs_with_random_patch_val,len(val_dataset_random),num_patches)
 
     test_dataset_random = Dataset_MRI(label_file=TEST_LABEL,groups='CN_AD',view_type=view_type,random_patch=True,M=M,N=N,num_patches=num_patches)
     imgs_with_random_patch_test = torch.utils.data.DataLoader(test_dataset_random, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+    imgs_with_random_patch_test = imgs_with_random_patch_generator_mri(imgs_with_random_patch_test,len(test_dataset_random),num_patches)
 
-  # training loop where we run the experiments for multiple times and report the 
-# mean and standard deviation of the metrics ph_acc and ICE.
+    # training loop where we run the experiments for multiple times and report the 
+    # mean and standard deviation of the metrics ph_acc and ICE.
     ## Initialize Selection model
     selector = initialize_model(sel_model_type,num_classes=M*M,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)
     #optimizer

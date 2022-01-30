@@ -15,9 +15,8 @@ import torch.nn.functional as F
 import random
 from joblib import dump, load
 from tqdm import tqdm
-from torch.utils.data import DataLoader, Sampler, SubsetRandomSampler
 from models import modifiedViT, initialize_model
-from utils import sample_concrete, custom_loss, generate_xs, metrics, imgs_with_random_patch_generator, load_dataset
+from utils import sample_concrete, custom_loss, generate_xs, metrics, imgs_with_random_patch_generator_mri
 from config import *
 import os
 
@@ -59,10 +58,11 @@ def train_eval(dataset_name,view_type,loss_weight,num_patches,validation):
   input_shape = (1,190,190)
   input_dim = 190
   LABEL_PATH = cfg.folds
-  TEST_LABEL = cfg.test_path
+  TEST_LABEL = cfg.test_csv
   checkpoint_path = cfg.checkpoint
   
-  
+  print("For dataset:",dataset_name)
+  print("For viewtype:",view_type)
   ######################################################################################################################################################
   #                                             MAIN TRAINING CODE                                                                                     #
   ######################################################################################################################################################
@@ -89,9 +89,11 @@ def train_eval(dataset_name,view_type,loss_weight,num_patches,validation):
       '''
       val_dataset_random = Dataset_MRI(label_file=VAL_LABEL,groups='CN_AD',view_type=view_type,random_patch=True,M=M,N=N,num_patches=num_patches)
       imgs_with_random_patch_val = torch.utils.data.DataLoader(val_dataset_random, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+      imgs_with_random_patch_val = imgs_with_random_patch_generator_mri(imgs_with_random_patch_val,len(val_dataset_random),num_patches)
 
       test_dataset_random = Dataset_MRI(label_file=TEST_LABEL,groups='CN_AD',view_type=view_type,random_patch=True,M=M,N=N,num_patches=num_patches)
       imgs_with_random_patch_test = torch.utils.data.DataLoader(test_dataset_random, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+      imgs_with_random_patch_test = imgs_with_random_patch_generator_mri(imgs_with_random_patch_test,len(test_dataset_random),num_patches)
 
       # intantiating the interpretable transformer
       model_type = 'expViT'

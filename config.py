@@ -35,8 +35,7 @@ num_init = 5 # number of initializations of the explainer
 
 ## For MRI data
 #cfg.mri_data = '/u/vul-d1/scratch/subash/ADNI/Preprocessed'
-cfg.test_csv = '/home/skh259/LinLab/LinLab/MultiViewMRIClassification/cv_paths/CN_AD/CN_ADcombined_test_list.csv'
 cfg.mri_data = '/mnt/gpfs2_16m/pscratch/nja224_uksr/xin_data/Preprocessed/'
 cfg.checkpoint = '/mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/LinLab/CAT-XPLAIN/MRI/checkpoints/'
-cfg.test_path = '/mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/LinLab/CAT-XPLAIN/MRI/cv_paths/CN_AD/CN_ADcombined_test_list.csv'
+cfg.test_csv = '/mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/LinLab/CAT-XPLAIN/MRI/cv_paths/CN_AD/CN_ADcombined_test_list.csv'
 cfg.folds = '/mnt/gpfs2_16m/pscratch/nja224_uksr/SKH259/LinLab/CAT-XPLAIN/MRI/cv_paths/'
