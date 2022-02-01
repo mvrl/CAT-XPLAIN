@@ -1,7 +1,7 @@
 # ATtention for CAusal eXPLAINation (CAT-XPLAIN)
 This project aims at providing causal explaination capability for existing Neural Network Architectures. It utilizes attention mechanism of Transformers to attend and hence identify the most important regions of input that have highest Causal significance to the output. This project is motivated from a paper titled ["Instance-wise Causal Feature Selection for Model Interpretation", 2021 by Pranoy et. al.](https://openaccess.thecvf.com/content/CVPR2021W/CiV/papers/Panda_Instance-Wise_Causal_Feature_Selection_for_Model_Interpretation_CVPRW_2021_paper.pdf) 
 
-Their paper proposes to build a model agnostic post-hoc explainer model that is able to identify the most causally significant regions in the input space (features selection) of each instance. While their approach assumes that there exist a causal relationship between the input and output space, they ignore the relationships within the input space. Our project tries to offer solution for this limitation by using Transformers which in the core are based on self-attention mechanism effectively leveraging the relationships within the input space of each instance. Moreover, Unlike the post-hoc explanation approach, we propose to modify the existing Transformer architecture so that they are able to inherently identify the regions with highest causal strength while performing the task they are designed for. This leads to development of Transformers with causal explaination capability.
+Their paper proposes to build a model agnostic post-hoc explainer model that is able to identify the most causally significant regions in the input space (features selection) of each instance. Unlike the post-hoc explanation approach, we propose to modify the existing Transformer architecture so that the model able to inherently identify the regions with highest causal strength while performing the task they are designed for. This leads to development of Transformers with causal explaination capability without the need of additional post-hoc explainer.
 
 
 ### Steps (for MNIST and FMNIST)
@@ -13,15 +13,25 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 4.  `conda activate CAT-XPLAIN`
 5. Run the post-hoc experiment for MNIST or FMNIST datasets
 
-    `python post_hoc.py --num_patches 0.25 --validation "with_test" --bb_model_type "ViT" --sel_model_type "ViT" --dataset_name "mnist"`
+    `python ./MNIST_FMNIST/post_hoc.py --num_patches 0.25 --validation "with_test" --bb_model_type "ViT" --sel_model_type "ViT" --dataset_name "mnist"`
 
-    `python post_hoc.py --num_patches 0.25 --validation "with_test" --bb_model_type "ViT" --sel_model_type "ViT" --dataset_name "fmnist"`
+    `python ./MNIST_FMNIST/post_hoc.py --num_patches 0.25 --validation "with_test" --bb_model_type "ViT" --sel_model_type "ViT" --dataset_name "fmnist"`
 
 6. Run the Interpretable transformer for MNIST or FMNIST datasets
 
-    `python interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9 --dataset_name "mnist"`
+    `python ./MNIST_FMNIST/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9 --dataset_name "mnist"`
 
-    `python interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9 --dataset_name "fmnist"`
+    `python ./MNIST_FMNIST/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9 --dataset_name "fmnist"`
+
+### Steps (for IMDB dataset)
+1. Run the post-hoc experiment 
+    `python ./IMDB/post_hoc_imdb.py --num_patches 0.25 --validation "with_test" --bb_model_type "transformer" --sel_model_type "transformer"`
+
+
+2. Run the Interpretable transformer for MNIST or FMNIST datasets
+
+    `python ./IMDB/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9`
+
 
 ### Steps (for ADNI MRI dataset)
 
@@ -40,11 +50,11 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 
 3. Post-hoc experiment for MRI data
 
-    `python post_hoc_mri.py --num_patches 0.25 --validation "with_test"`
+    `python ./MRI/post_hoc_mri.py --num_patches 0.25 --validation "with_test"`
 
 4. Interpretable ViT experiment for MRI data
 
-    `python interpretable_transformer_mri.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9`
+    `python ./MRI/interpretable_transformer_mri.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9`
 
 
 
