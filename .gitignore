@@ -3,11 +3,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 fold_cv_split.py
-checkpoints/
 logs/
 *.log
 *.pt
-MRI/checkpoints/
+*/checkpoints/*
+*/__pycache__/
 MRI/*.zip
 MRI/*/*.zip
-MRI/__pycache__/
+
+
+
