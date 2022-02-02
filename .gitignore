@@ -1,16 +1,19 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 .data/
+.vector_cache/
 *.py[cod]
 *$py.class
 fold_cv_split.py
 logs/
 *.log
 *.pt
-*/checkpoints/*
+*/checkpoints/*.pt
 */__pycache__/
 MRI/*.zip
 MRI/*/*.zip
+IMDB/.data/
+IMDB/.vector_cache/
 
 
 
