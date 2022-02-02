@@ -10,7 +10,7 @@ import torch.nn.functional as F
 import random
 from joblib import dump, load
 from tqdm import tqdm
-from models import modifiedTextTransformer 
+from text_models import modifiedTextTransformer 
 from text_utils import num2words, get_imdb, random_mask_generator, text_with_random_word_generator, sample_concrete, generate_xs_text, metrics, initialize_model, custom_loss
 from config import *
 import os
@@ -47,9 +47,9 @@ def train_eval(dataset_name,loss_weight,num_words,validation):
   seed_initialize(seed = 12345)
   num_words = int(num_words*max_length)
   k = max_length - int(num_words)# number of words for S_bar
-  
+  batch_size = 64
   ###################################### LOAD DATASET ######################################################
-  trainloader, traincount, valloader, validcount, testloader, testcount, vectors, vocab = get_imdb(batch_size=batch_size, max_length=max_length,device=device)
+  trainloader, traincount, valloader, validcount, testloader, testcount, vectors, vocab = get_imdb(batch_size=batch_size, max_length=max_length,emb_dim=emb_dim,device=device)
 
   ##########################################################################################################################################################
   ################################################# RANDOM PATCH SELECTED DATASET CREATOR ##################################################################
@@ -80,16 +80,17 @@ def train_eval(dataset_name,loss_weight,num_words,validation):
       # training loop
       for epoch in range(num_epochs):  
         running_loss = 0
-        for i, data in enumerate(trainloader, 0):
+        i = 0
+        for item in trainloader:
           X = item.text[0].to(device)
           Y = item.label.long().to(device)
           batch_size = X.size(0)
         # zero the parameter gradients
           optimizer.zero_grad()
         # 1: get the logits from construct_gumbel_selector()
-          class_logits, patch_logits = selector.forward(X)
+          class_logits, word_logits = selector.forward(X)
         # 2: get a subset of the features(encoded in a binary vector) by using the gumbel-softmax trick      
-          selected_subset = sample_concrete(tau,k,patch_logits,train=True) # get S_bar from explainer
+          selected_subset = sample_concrete(tau,k,word_logits,train=True) # get S_bar from explainer
         
           f_xsbar = F.softmax(bb_model(X,selected_subset)[0]) # f_xs stores p(y|xs)
           with torch.no_grad():
@@ -103,8 +104,8 @@ def train_eval(dataset_name,loss_weight,num_words,validation):
           optimizer.step()
 
           running_loss+=loss.item() # sum to caluclate average loss per sample later
-        
-        val_acc,val_ice = metrics(selector,k,init_num,valloader,bb_model,max_length,num_words,intrinsic=True)
+        i += 1
+        val_acc,val_ice = metrics(selector,k,iter_num,valloader,bb_model,max_length,num_words,intrinsic=True)
         val_accs.append(val_acc)
         val_ices.append(val_ice)
         if not os.path.exists(checkpoint_path):
@@ -159,7 +160,7 @@ if  __name__ == '__main__':
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     args = parser.parse_args()
     dataset_name = args.dataset_name
-    num_words = float(args.num_patches)
+    num_words = float(args.num_words)
     loss_weight = float(args.loss_weight)
     validation = args.validation  
     train_eval(dataset_name,loss_weight,num_words,validation)

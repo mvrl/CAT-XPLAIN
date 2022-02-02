@@ -1,11 +1,12 @@
 import torch
 from easydict import EasyDict as edict
+import os
 cfg = edict()
 
 num_epochs_basemodel = 2
 lr_basemodel = 0.0001 
 
-data_path = './IMDB/checkpoints/'
+data_path = '/u/amo-d0/grad/skh259/projects/CAT-XPLAIN/IMDB/checkpoints/'
 checkpoint_path = data_path
 
 
@@ -17,7 +18,7 @@ eps=1e-10
 loss_weight = 0.9
 gpus =0
 device = torch.device('cuda:'+str(gpus) if torch.cuda.is_available() else 'cpu')
-max_length = 250
+max_length = 50
 num_classes = 2
 emb_dim = 300
 

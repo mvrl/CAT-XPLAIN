@@ -1,11 +1,12 @@
 import torch
 from easydict import EasyDict as edict
+import os
 cfg = edict()
 
 num_epochs_basemodel = 2
 lr_basemodel = 0.0001 
 
-data_path = './MNIST_FMNIST/checkpoints/'
+data_path = '/u/amo-d0/grad/skh259/projects/CAT-XPLAIN/MNIST_FMNIST/checkpoints/'
 checkpoint_path = data_path
 
 

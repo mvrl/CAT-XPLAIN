@@ -1,11 +1,12 @@
 import torch
 from easydict import EasyDict as edict
+import os
 cfg = edict()
 
 num_epochs_basemodel = 2
 lr_basemodel = 0.0001 
 
-data_path = './checkpoints/'
+data_path = '/u/amo-d0/grad/skh259/projects/CAT-XPLAIN/MRI/checkpoints/'
 checkpoint_path = data_path
 
 
@@ -17,8 +18,8 @@ eps=1e-10
 loss_weight = 0.9
 gpus =0
 device = torch.device('cuda:'+str(gpus) if torch.cuda.is_available() else 'cpu')
-input_shape = (1,28,28)
-input_dim = 28
+input_shape = (1,190,190)
+input_dim = 190
 num_classes = 2
 total_num_patches = 7*7
 

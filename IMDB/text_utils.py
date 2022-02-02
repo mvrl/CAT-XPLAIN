@@ -5,9 +5,13 @@ from torchtext.vocab import GloVe
 import string
 from torchtext.data.utils import get_tokenizer
 from config import num_init
-from models import TextTransformer, modifiedTextTransformer
+from text_models import TextTransformer, modifiedTextTransformer
 import numpy as np
-# Taken from https://github.com/PrideLee/sentiment-analysis/blob/6637f8f9dfb44308ca47a3e92fcdd7638e62a485/transformer/dataloader.py
+import torch
+from tqdm import tqdm
+from torch import nn, optim
+import torch.nn.functional as F
+from config import *
 
 
 def num2words(vocab, vec):
@@ -27,20 +31,15 @@ def datapoints_counter(data_iter):
   return text_count
 
 
-def get_imdb(batch_size=64, max_length=250,device='cpu'):
+def get_imdb(batch_size=64, max_length=250,emb_dim=30,device='cpu'):
+# Adapted from from https://github.com/PrideLee/sentiment-analysis/blob/6637f8f9dfb44308ca47a3e92fcdd7638e62a485/transformer/dataloader.py
   tokenizer = get_tokenizer('basic_english')
   TEXT = torchtext.legacy.data.Field(lower=True, include_lengths=True, batch_first=True, tokenize=tokenizer, fix_length=max_length)
-    # sequential: Whether the datatype represents sequential data. If False, no tokenization is applied. Default: True.
-    # unk_token: The string token used to represent OOV words. Default: "<unk>".
-    # pad_token: The string token used as padding. Default: "<pad>".
   LABEL = torchtext.legacy.data.Field(sequential=False, unk_token=None, pad_token=None)
-  # train_set = text_datasets.IMDB(root=data_path, split='train')
-  # test_set = text_datasets.IMDB(root=data_path, split='test')
-
   train_set, test_set = torchtext.legacy.datasets.IMDB.splits(TEXT, LABEL)
   train_set, valid_set = torchtext.legacy.data.Dataset.split(train_set,split_ratio=0.85, stratified=False, strata_field='label', random_state=None)
 
-  TEXT.build_vocab(train_set, vectors=GloVe(name='6B', dim=300, max_vectors=500000))
+  TEXT.build_vocab(train_set, vectors=GloVe(name='6B', dim=emb_dim, max_vectors=500000))
   LABEL.build_vocab(train_set)
 
   # print vocab information
@@ -50,7 +49,7 @@ def get_imdb(batch_size=64, max_length=250,device='cpu'):
   # make iterator for splits based on the batch_size
   train_iter, valid_iter, test_iter = torchtext.legacy.data.BucketIterator.splits((train_set, valid_set, test_set), batch_size=batch_size, device=device)
   # Print number of batches
-  print("Number of images in each data split(train/val/test):")
+  print("Number of texts in each data split(train/val/test):")
   traincount = datapoints_counter(train_iter)
   validcount = datapoints_counter(valid_iter)
   testcount = datapoints_counter(test_iter)
@@ -144,7 +143,7 @@ def metrics(selector,k,init_num,valloader,bb_model,max_length,num_words,intrinsi
     for i in range(len(one_batch)):
       text = one_batch[i].unsqueeze(0).to(device)
       label = batch_label[i].to(device)
-      selected_subset = generate_xs_text(text,selector,k,intrinsic=False)
+      selected_subset = generate_xs_text(text,selector,k,intrinsic=intrinsic).to(device)
       # xprime_subset = torch.tensor(texts_with_random_val[init_num][all_count]).unsqueeze(0).to(device)
       xprime_subset = torch.tensor(random_mask_generator(max_length,num_words)).unsqueeze(0).to(device)
       with torch.no_grad():

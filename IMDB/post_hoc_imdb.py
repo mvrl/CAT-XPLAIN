@@ -1,7 +1,7 @@
 # ## Most of the code below is taken from: https://github.com/pranoy-panda/Causal-Feature-Subset-Selection
 
 
-from models import TextTransformer
+from text_models import TextTransformer
 import itertools
 from easydict import EasyDict as edict
 
@@ -19,6 +19,7 @@ from text_utils import num2words, get_imdb, text_with_random_word_generator, ran
 from text_utils import train_basemodel, test_basemodel, initialize_model, custom_loss
 from config import *
 import os
+import sys
 
 # for supressing warnings
 import warnings
@@ -37,7 +38,8 @@ def seed_initialize(seed = 12345):
 
 def train_eval(dataset_name, bb_model_type, sel_model_type, num_words,validation='without_test'):
   seed_initialize(seed = 12345)
-  trainloader, traincount, valloader, validcount, testloader, testcount, vectors, vocab = get_imdb(batch_size=batch_size, max_length=max_length,device=device)
+  batch_size = 64
+  trainloader, traincount, valloader, validcount, testloader, testcount, vectors, vocab = get_imdb(batch_size=batch_size, max_length=max_length,emb_dim=emb_dim,device=device)
   print("For dataset:",dataset_name)
   print("For Experiment with bb_model:",bb_model_type)
   print("For Experiment with sel_model:",sel_model_type)
@@ -54,7 +56,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_words,validation
 
   # train the basemodel 
   bb_model = train_basemodel(trainloader,valloader,bb_model,
-            LossFunc_basemodel,optimizer_basemodel,,num_epochs,batch_size,checkpoint_path)
+            LossFunc_basemodel,optimizer_basemodel,num_epochs,batch_size,checkpoint_path)
 
   # testing the model on held-out validation dataset
   if validation == 'without_test':
@@ -93,7 +95,8 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_words,validation
     # training loop
     for epoch in range(num_epochs):  
         running_loss = 0
-        for item in enumerate(trainloader, 0):
+        i = 0
+        for item in trainloader:
             X = item.text[0].to(device)
             Y = item.label.long().to(device)
             batch_size = X.size(0)
@@ -114,8 +117,9 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_words,validation
             optimizer.step()
           
             running_loss+=loss.item() # average loss per sample
+        i += 1
   ################################################################################
-        val_acc,val_ice = metrics(selector,k,init_num,valloader,bb_model,max_length,num_words,intrinsic=False)
+        val_acc,val_ice = metrics(selector,k,iter_num,valloader,bb_model,max_length,num_words,intrinsic=False)
         val_accs.append(val_acc)
         val_ices.append(val_ice)
         if not os.path.exists(checkpoint_path):

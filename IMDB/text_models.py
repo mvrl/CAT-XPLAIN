@@ -107,7 +107,7 @@ class TextTransformer(nn.Module):
         b = x.shape[0]
         n = self.max_length
         x = self.to_embedding(x)
-        if not len(mask):
+        if len(mask) != 0:
             mask = torch.tensor(mask).unsqueeze(2)
             mask = mask.expand(b,self.max_length,self.emb_dim)
             x = torch.mul(x, mask)
@@ -163,7 +163,7 @@ class modifiedTextTransformer(nn.Module):
         b = x.shape[0]
         n = self.max_length
         x = self.to_embedding(x)
-        if not len(mask):
+        if len(mask) != 0:
             mask = torch.tensor(mask).unsqueeze(2)
             mask = mask.expand(b,self.max_length,self.emb_dim)
             x = torch.mul(x, mask)
