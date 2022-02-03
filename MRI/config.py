@@ -3,7 +3,7 @@ from easydict import EasyDict as edict
 import os
 cfg = edict()
 
-num_epochs_basemodel = 2
+num_epochs_basemodel = 20
 lr_basemodel = 0.0001 
 
 data_path = '/home/skh259/LinLab/LinLab/CAT-XPLAIN/MRI/checkpoints/'
@@ -24,13 +24,13 @@ num_classes = 2
 
 # 0: define global vars(tau, k, etc)
 # M*N x M*N is the size of the image
-M = 7 # selection map size(assuming a square shaped selection map) 
-N = 4 # patch size(square patch)
+M = 19
+N = 10
 tau = 0.1
-num_epochs = 2
+num_epochs = 20
 lr = 0.0001
 best_val_acc = 0
-num_init = 2 # number of initializations of the explainer
+num_init = 3 # number of initializations of the explainer
 
 
 ## For MRI data

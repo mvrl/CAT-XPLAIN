@@ -3,7 +3,7 @@ from easydict import EasyDict as edict
 import os
 cfg = edict()
 
-num_epochs_basemodel = 2
+num_epochs_basemodel = 20
 lr_basemodel = 0.0001 
 
 data_path = '/home/skh259/LinLab/LinLab/CAT-XPLAIN/IMDB/checkpoints/'
@@ -18,12 +18,12 @@ eps=1e-10
 loss_weight = 0.9
 gpus =0
 device = torch.device('cuda:'+str(gpus) if torch.cuda.is_available() else 'cpu')
-max_length = 50
+max_length = 100
 num_classes = 2
 emb_dim = 300
 
 tau = 0.1
-num_epochs = 2
+num_epochs = 20
 lr = 0.0001
 best_val_acc = 0
-num_init = 2 # number of initializations of the explainer
+num_init = 3 # number of initializations of the explainer
