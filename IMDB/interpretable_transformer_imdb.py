@@ -43,14 +43,13 @@ test_acc_list = []
 test_ice_list = []
 
 
-def train_eval(dataset_name,loss_weight,depth,dim_head,num_words,validation):
+def train_eval(dataset_name,loss_weight,depth,dim,num_words,validation):
   seed_initialize(seed = 12345)
   num_words = int(num_words*max_length)
   k = max_length - int(num_words)# number of words for S_bar
   batch_size = 64
-  emb_dim = 300
   ###################################### LOAD DATASET ######################################################
-  trainloader, traincount, valloader, validcount, testloader, testcount, vectors, vocab = get_imdb(batch_size=batch_size, max_length=max_length,emb_dim=emb_dim,device=device)
+  trainloader, traincount, valloader, validcount, testloader, testcount, vectors, vocab = get_imdb(batch_size=batch_size, max_length=max_length,emb_dim=dim,device=device)
 
   ##########################################################################################################################################################
   ################################################# RANDOM PATCH SELECTED DATASET CREATOR ##################################################################
@@ -68,7 +67,7 @@ def train_eval(dataset_name,loss_weight,depth,dim_head,num_words,validation):
   # mean and standard deviation of the metrics ph_acc and ICE.
   for iter_num in range(num_init):
       model_type = 'exptransformer'
-      bb_model = initialize_model(model_type=model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,emb_dim=emb_dim,dim_head=dim_head,depth=depth,device=device)
+      bb_model = initialize_model(model_type=model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,dim=dim,depth=depth,device=device)
       
       selector = bb_model
       LossFunc = torch.nn.CrossEntropyLoss(size_average = True)
@@ -127,7 +126,7 @@ def train_eval(dataset_name,loss_weight,depth,dim_head,num_words,validation):
       print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
       print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
       best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector.pt')
-      best_model = initialize_model(model_type=model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,emb_dim=emb_dim,dim_head=dim_head,depth=depth,device=device)
+      best_model = initialize_model(model_type=model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,dim=dim,depth=depth,device=device)
       
       checkpoint = torch.load(best_model_path)
       best_model.load_state_dict(checkpoint['model_state_dict'])
@@ -158,7 +157,7 @@ if  __name__ == '__main__':
     parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[imdb]", default= 'imdb')
     parser.add_argument('--loss_weight',  type=str,help="weight assigned to selection loss", default= "0.9")
     parser.add_argument('--depth',  type=str,help="depth of the transformer block: Options[1,2,4,8,10]", default= "8")
-    parser.add_argument('--dim_head',  type=str,help="dimension of hidden state: Options[64,128,256,512]", default= "128")
+    parser.add_argument('--dim',  type=str,help="dimension of hidden state: Options[300]", default= "300")
     parser.add_argument('--num_words',  type=str,help="frac for number of words to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     args = parser.parse_args()
@@ -166,7 +165,7 @@ if  __name__ == '__main__':
     num_words = float(args.num_words)
     loss_weight = float(args.loss_weight)
     depth = int(args.depth)
-    dim_head = int(args.dim_head)
+    dim = int(args.dim)
     validation = args.validation 
 
-    train_eval(dataset_name=dataset_name,loss_weight=loss_weight,depth=depth,dim_head=dim_head,num_words=num_words,validation=validation)
+    train_eval(dataset_name=dataset_name,loss_weight=loss_weight,depth=depth,dim=dim,num_words=num_words,validation=validation)

@@ -41,7 +41,7 @@ def seed_initialize(seed = 12345):
   torch.cuda.manual_seed(SEED)
 
 
-def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,depth,dim_head,num_patches,validation='without_test'):
+def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,depth,dim,num_patches,validation='without_test'):
   seed_initialize(seed = 12345)
   groups = 'CN_AD'
   cls = [0,1]
@@ -53,7 +53,6 @@ def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,depth,dim_hea
   TEST_LABEL = cfg.test_csv
   checkpoint_path = cfg.checkpoint
   
-  dim = 128
   
   print("For dataset:",dataset_name)
   print("For viewtype:",view_type)
@@ -86,7 +85,7 @@ def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,depth,dim_hea
     test_dataset = Dataset_MRI(label_file=TEST_LABEL,groups='CN_AD',random_patch=False,M=M,N=N,num_patches=num_patches)
     testloader = torch.utils.data.DataLoader(test_dataset, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
 
-    bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,dim_head = dim_head,depth=depth,heads=8,mlp_dim=256,device=device).float()  
+    bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device).float()  
     
     LossFunc_basemodel = torch.nn.CrossEntropyLoss(size_average = True)
     optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
@@ -126,7 +125,7 @@ def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,depth,dim_hea
     # training loop where we run the experiments for multiple times and report the 
     # mean and standard deviation of the metrics ph_acc and ICE.
     ## Initialize Selection model
-    selector = initialize_model(sel_model_type,num_classes=M*M,input_dim=input_dim,patch_size=N,dim=dim,dim_head = dim_head,depth=depth,heads=8,mlp_dim=256,device=device).float()
+    selector = initialize_model(sel_model_type,num_classes=M*M,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device).float()
     #optimizer
     optimizer = torch.optim.Adam(selector.parameters(),lr = lr)
     
@@ -191,13 +190,13 @@ def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,depth,dim_hea
     
     best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_posthoc_selector.pt')
     ## Initialize Selection model
-    best_model = initialize_model(sel_model_type,num_classes=M*M,input_dim=input_dim,patch_size=N,dim=dim,dim_head = dim_head,depth=depth,heads=8,mlp_dim=256,device=device).float()
+    best_model = initialize_model(sel_model_type,num_classes=M*M,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device).float()
     checkpoint = torch.load(best_model_path)
     best_model.load_state_dict(checkpoint['model_state_dict'])
 
     ## Initialize base blackbox model
     bb_checkpoint = torch.load(checkpoint_path+'_model.pt')
-    bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,dim_head = dim_head,depth=depth,heads=8,mlp_dim=256,device=device).float()  
+    bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device).float()  
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
@@ -227,7 +226,7 @@ if  __name__ == '__main__':
     parser.add_argument('--bb_model_type', type=str,help="Base_model type: Options:[ViT]",default="ViT")
     parser.add_argument('--sel_model_type', type=str,help="select_model type: Options:[ViT]",default="ViT")
     parser.add_argument('--depth',  type=str,help="depth of the transformer block: Options[1,2,4,8,10]", default= "8")
-    parser.add_argument('--dim_head',  type=str,help="dimension of internal state: Options[64,128,256,512]", default= "128")
+    parser.add_argument('--dim',  type=str,help="dimension of internal state: Options[64,128,256,512]", default= "128")
     parser.add_argument('--num_patches',  type=str,help="frac for number of patches to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     parser.add_argument('--sweep', type=str,help="select_model type: Options:[sweep,no_sweep]",default="no_sweep")
@@ -239,11 +238,8 @@ if  __name__ == '__main__':
     bb_model_type = args.bb_model_type
     sel_model_type = args.sel_model_type
     depth = int(args.depth)
-    dim_head = int(args.dim_head)
+    dim = int(args.dim)
    
     train_eval(dataset_name=dataset_name,view_type=view_type,
             bb_model_type=bb_model_type,sel_model_type=sel_model_type,
-            depth=depth,dim_head=dim_head,num_patches=num_patches,validation=validation)
-
-
-
+            depth=depth,dim=dim,num_patches=num_patches,validation=validation)

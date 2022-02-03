@@ -20,7 +20,7 @@ gpus =0
 device = torch.device('cuda:'+str(gpus) if torch.cuda.is_available() else 'cpu')
 input_shape = (1,28,28)
 input_dim = 28
-num_classes = 3
+num_classes = 2
 
 
 # 0: define global vars(tau, k, etc)

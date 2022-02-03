@@ -41,7 +41,7 @@ print(np.version.version)
 print(torch.__version__)
 print(device)
 
-def train_eval(dataset_name,view_type,loss_weight,depth,dim_head,num_patches,validation):
+def train_eval(dataset_name,view_type,loss_weight,depth,dim,num_patches,validation):
   cls = [0,1]
   groups = 'CN_AD'
   seed_initialize(seed = 12345)
@@ -55,7 +55,6 @@ def train_eval(dataset_name,view_type,loss_weight,depth,dim_head,num_patches,val
   TEST_LABEL = cfg.test_csv
   checkpoint_path = cfg.checkpoint
   batch_size = 16
-  dim = 128
   
   print("For dataset:",dataset_name)
   print("For viewtype:",view_type)
@@ -99,7 +98,7 @@ def train_eval(dataset_name,view_type,loss_weight,depth,dim_head,num_patches,val
 
       # intantiating the interpretable transformer
       model_type = 'expViT'
-      bb_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,dim_head = dim_head,depth=depth,heads=8,mlp_dim=256,device=device).float()
+      bb_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device).float()
       selector = bb_model
       LossFunc = torch.nn.CrossEntropyLoss(size_average = True)
       #optimizer
@@ -166,7 +165,7 @@ def train_eval(dataset_name,view_type,loss_weight,depth,dim_head,num_patches,val
       print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
       print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
       best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector.pt')
-      best_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,dim_head = dim_head,depth=depth,heads=8,mlp_dim=256,device=device).float()
+      best_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device).float()
       checkpoint = torch.load(best_model_path)
       best_model.load_state_dict(checkpoint['model_state_dict'])
       optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -196,7 +195,7 @@ if  __name__ == '__main__':
     parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[mri]", default= 'mri')
     parser.add_argument('--view_type', type=str, help='View type either for Single View or MultiView Options: [0 or 1 or 2 or multi]', default='1')
     parser.add_argument('--depth',  type=str,help="depth of the transformer block: Options[1,2,4,8,10]", default= "8")
-    parser.add_argument('--dim_head',  type=str,help="dimension of internal hidden state: Options[64,128,256,512]", default= "128")
+    parser.add_argument('--dim',  type=str,help="dimension of internal hidden state: Options[64,128,256,512]", default= "128")
     parser.add_argument('--loss_weight',  type=str,help="weight assigned to selection loss", default= "0.9")
     parser.add_argument('--num_patches',  type=float,help="frac for number of patches to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
@@ -207,7 +206,7 @@ if  __name__ == '__main__':
     loss_weight = float(args.loss_weight)
     validation = args.validation
     depth = int(args.depth)
-    dim_head = int(args.dim_head)  
+    dim = int(args.dim)  
   
     train_eval(dataset_name=dataset_name,view_type=view_type,loss_weight=loss_weight,
-              depth=depth,dim_head=dim_head,num_patches=num_patches,validation=validation)
+              depth=depth,dim=dim,num_patches=num_patches,validation=validation)

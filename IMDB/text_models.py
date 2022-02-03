@@ -195,8 +195,8 @@ if __name__ == "__main__":
     vocab_emb = torch.rand(100000,300) #vocab size of 100000 and dimension of vector 300
     one_batch = torch.randint(0,10000,(batch_size,max_words))
     model1 = TextTransformer(vocab_emb=vocab_emb, num_classes =2, max_length=max_words, dim=300, depth=3, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = 64, dropout = 0., emb_dropout = 0.,train_word_embeddings=True).to('cpu')
-    model2 = modifiedTextTransformer(vocab_emb=vectors, num_classes =2, max_length=50, dim=max_words, depth=3, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = 64, dropout = 0., emb_dropout = 0.,explain=True,train_word_embeddings=True).to('cpu')
-
+    model2 = modifiedTextTransformer(vocab_emb=vectors, num_classes =2, max_length=max_words, dim=300, depth=3, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = 64, dropout = 0., emb_dropout = 0.,explain=True,train_word_embeddings=True).to('cpu')
+    
     print(model1.forward(one_batch).shape)
     print(model2.forward(one_batch)[0].shape, model2.forward(one_batch)[1].shape)
 

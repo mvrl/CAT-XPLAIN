@@ -195,7 +195,7 @@ class modifiedViT(nn.Module):
         return self.cls_mlp_head(x), self.exp_mlp_head(mask)
 
 
-def initialize_model(model_type,num_classes,input_dim,patch_size,dim,dim_head,depth,heads,mlp_dim,device):
+def initialize_model(model_type,num_classes,input_dim,patch_size,dim,depth,heads,mlp_dim,device):
     if model_type == 'ViT':
         model =  ViT(
               image_size = input_dim,
@@ -203,7 +203,7 @@ def initialize_model(model_type,num_classes,input_dim,patch_size,dim,dim_head,de
               num_classes = num_classes,
               channels = 1,
               dim = dim,
-              dim_head = dim_head,
+              dim_head = 64,
               depth = depth,
               heads = heads,
               mlp_dim = mlp_dim,
@@ -216,7 +216,7 @@ def initialize_model(model_type,num_classes,input_dim,patch_size,dim,dim_head,de
               num_classes = num_classes,
               channels = 1,
               dim = dim,
-              dim_head = dim_head,
+              dim_head = 64,
               depth = depth,
               heads = heads,
               mlp_dim = mlp_dim,

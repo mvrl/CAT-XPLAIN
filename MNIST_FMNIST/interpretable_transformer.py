@@ -50,11 +50,10 @@ test_acc_list = []
 test_ice_list = []
 
 
-def train_eval(dataset_name,loss_weight,depth,dim_head,num_patches,validation):
+def train_eval(dataset_name,loss_weight,depth,dim,num_patches,validation):
   seed_initialize(seed = 12345)
   num_patches = int(num_patches*M*M)
   k = M*M-int(num_patches)# number of patches for S_bar
-  dim = 128
   ###################################### LOAD DATASET ######################################################
   cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize = load_dataset(dataset_name=dataset_name)
 
@@ -75,7 +74,7 @@ def train_eval(dataset_name,loss_weight,depth,dim_head,num_patches,validation):
   # mean and standard deviation of the metrics ph_acc and ICE.
   for iter_num in range(num_init):
       model_type = 'expViT'
-      bb_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,dim_head=dim_head,depth=depth,heads=8,mlp_dim=256,device=device)
+      bb_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
      
       selector = bb_model
       LossFunc = torch.nn.CrossEntropyLoss(size_average = True)
@@ -143,7 +142,7 @@ def train_eval(dataset_name,loss_weight,depth,dim_head,num_patches,validation):
       print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
       print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
       best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector.pt')
-      best_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,dim_head=dim_head,depth=depth,heads=8,mlp_dim=256,device=device)
+      best_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
      
       checkpoint = torch.load(best_model_path)
       best_model.load_state_dict(checkpoint['model_state_dict'])
@@ -173,7 +172,7 @@ if  __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[fmnist, mnist]", default= 'mnist')
     parser.add_argument('--depth',  type=str,help="depth of the transformer block: Options[1,2,4,8,10]", default= "8")
-    parser.add_argument('--dim_head',  type=str,help="dimension of hidden state: Options[64,128,256,512]", default= "128")
+    parser.add_argument('--dim',  type=str,help="dimension of hidden state: Options[64,128,256,512]", default= "128")
     parser.add_argument('--loss_weight',  type=str,help="weight assigned to selection loss", default= "0.9")
     parser.add_argument('--num_patches',  type=str,help="frac for number of patches to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
@@ -183,7 +182,7 @@ if  __name__ == '__main__':
     loss_weight = float(args.loss_weight)
     validation = args.validation 
     depth = int(args.depth)
-    dim_head = int(args.dim_head) 
+    dim = int(args.dim) 
 
     train_eval(dataset_name=dataset_name,loss_weight=loss_weight,
-            depth=depth,dim_head=dim_head,num_patches=num_patches,validation=validation)
+            depth=depth,dim=dim,num_patches=num_patches,validation=validation)

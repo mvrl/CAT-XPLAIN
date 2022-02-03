@@ -271,14 +271,14 @@ def test_basemodel(valloader,bb_model):
   print("Model Accuracy =", (correct_count/all_count)) 
 
 
-def initialize_model(model_type,vocab_emb,emb_dim,dim_head,depth,num_classes,max_length,device):
+def initialize_model(model_type,vocab_emb,dim,depth,num_classes,max_length,device):
     if model_type == 'transformer':
-        model = TextTransformer(vocab_emb=vocab_emb, num_classes =num_classes, max_length=max_length, dim=emb_dim, 
-                depth=depth, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = dim_head, dropout = 0.,
+        model = TextTransformer(vocab_emb=vocab_emb, num_classes =num_classes, max_length=max_length, dim=dim, 
+                depth=depth, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = 64, dropout = 0.,
                 emb_dropout = 0.,train_word_embeddings=True).to(device)
     if model_type == 'exptransformer':
         model = modifiedTextTransformer(vocab_emb=vocab_emb, num_classes = num_classes, max_length=max_length,
-                dim=emb_dim, depth=depth, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = dim_head,
+                dim=dim, depth=depth, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = 64,
                 dropout = 0., emb_dropout = 0.,explain=True,train_word_embeddings=True).to(device)
     return model.double()
 
