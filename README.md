@@ -30,7 +30,7 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 
 2. Run the Interpretable transformer for MNIST or FMNIST datasets
 
-    `python ./IMDB/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9`
+    `python ./IMDB/interpretable_transformer_imdb.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9`
 
 
 ### Steps (for ADNI MRI dataset)

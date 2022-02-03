@@ -191,13 +191,13 @@ def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,depth,dim_hea
     
     best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_posthoc_selector.pt')
     ## Initialize Selection model
-    best_model = initialize_model(sel_model_type,num_classes=M*M,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device).float()
+    best_model = initialize_model(sel_model_type,num_classes=M*M,input_dim=input_dim,patch_size=N,dim=dim,dim_head = dim_head,depth=depth,heads=8,mlp_dim=256,device=device).float()
     checkpoint = torch.load(best_model_path)
     best_model.load_state_dict(checkpoint['model_state_dict'])
 
     ## Initialize base blackbox model
     bb_checkpoint = torch.load(checkpoint_path+'_model.pt')
-    bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device).float()
+    bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,dim_head = dim_head,depth=depth,heads=8,mlp_dim=256,device=device).float()  
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 

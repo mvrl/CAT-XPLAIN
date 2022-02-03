@@ -6,7 +6,7 @@ cfg = edict()
 num_epochs_basemodel = 2
 lr_basemodel = 0.0001 
 
-data_path = '/u/amo-d0/grad/skh259/projects/CAT-XPLAIN/IMDB/checkpoints/'
+data_path = '/home/skh259/LinLab/LinLab/CAT-XPLAIN/IMDB/checkpoints/'
 checkpoint_path = data_path
 
 

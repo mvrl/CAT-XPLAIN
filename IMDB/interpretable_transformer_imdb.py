@@ -48,7 +48,7 @@ def train_eval(dataset_name,loss_weight,depth,dim_head,num_words,validation):
   num_words = int(num_words*max_length)
   k = max_length - int(num_words)# number of words for S_bar
   batch_size = 64
-  emb_dim = 128
+  emb_dim = 300
   ###################################### LOAD DATASET ######################################################
   trainloader, traincount, valloader, validcount, testloader, testcount, vectors, vocab = get_imdb(batch_size=batch_size, max_length=max_length,emb_dim=emb_dim,device=device)
 
@@ -127,7 +127,7 @@ def train_eval(dataset_name,loss_weight,depth,dim_head,num_words,validation):
       print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
       print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
       best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector.pt')
-      best_model = initialize_model(model_type=model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,emb_dim=emb_dim,device=device)
+      best_model = initialize_model(model_type=model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,emb_dim=emb_dim,dim_head=dim_head,depth=depth,device=device)
       
       checkpoint = torch.load(best_model_path)
       best_model.load_state_dict(checkpoint['model_state_dict'])

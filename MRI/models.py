@@ -203,7 +203,7 @@ def initialize_model(model_type,num_classes,input_dim,patch_size,dim,dim_head,de
               num_classes = num_classes,
               channels = 1,
               dim = dim,
-              dim_head = dim_head
+              dim_head = dim_head,
               depth = depth,
               heads = heads,
               mlp_dim = mlp_dim,

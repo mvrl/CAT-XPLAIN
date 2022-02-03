@@ -166,7 +166,7 @@ def train_eval(dataset_name,view_type,loss_weight,depth,dim_head,num_patches,val
       print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
       print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
       best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector.pt')
-      best_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=128,depth=2,heads=4,mlp_dim=256,device=device)
+      best_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,dim_head = dim_head,depth=depth,heads=8,mlp_dim=256,device=device).float()
       checkpoint = torch.load(best_model_path)
       best_model.load_state_dict(checkpoint['model_state_dict'])
       optimizer.load_state_dict(checkpoint['optimizer_state_dict'])

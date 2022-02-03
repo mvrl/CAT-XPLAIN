@@ -6,7 +6,7 @@ cfg = edict()
 num_epochs_basemodel = 2
 lr_basemodel = 0.0001 
 
-data_path = '/u/amo-d0/grad/skh259/projects/CAT-XPLAIN/MRI/checkpoints/'
+data_path = '/home/skh259/LinLab/LinLab/CAT-XPLAIN/MRI/checkpoints/'
 checkpoint_path = data_path
 
 
@@ -21,7 +21,6 @@ device = torch.device('cuda:'+str(gpus) if torch.cuda.is_available() else 'cpu')
 input_shape = (1,190,190)
 input_dim = 190
 num_classes = 2
-total_num_patches = 7*7
 
 # 0: define global vars(tau, k, etc)
 # M*N x M*N is the size of the image

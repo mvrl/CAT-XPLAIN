@@ -39,7 +39,7 @@ def seed_initialize(seed = 12345):
 def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim_head,num_words,validation='without_test'):
   seed_initialize(seed = 12345)
   batch_size = 64
-  emd_dim = 128
+  emd_dim = 300
   trainloader, traincount, valloader, validcount, testloader, testcount, vectors, vocab = get_imdb(batch_size=batch_size, max_length=max_length,emb_dim=emb_dim,device=device)
   print("For dataset:",dataset_name)
   print("For Experiment with bb_model:",bb_model_type)
@@ -143,13 +143,13 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim_head,num_
     
     best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_posthoc_selector.pt')
     ## Initialize Selection model
-    best_model = initialize_model(model_type=sel_model_type,vocab_emb=vectors,num_classes=max_length,max_length=max_length,emb_dim=emb_dim,device=device)
+    best_model = initialize_model(model_type=sel_model_type,vocab_emb=vectors,num_classes=max_length,max_length=max_length,emb_dim=emb_dim,dim_head=dim_head,depth=depth,device=device)
     checkpoint = torch.load(best_model_path)
     best_model.load_state_dict(checkpoint['model_state_dict'])
 
     ## Initialize base blackbox model
     bb_checkpoint = torch.load(checkpoint_path+'_model.pt')
-    bb_model = initialize_model(model_type=bb_model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,emb_dim=emb_dim,device=device)
+    bb_model = initialize_model(model_type=bb_model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,emb_dim=emb_dim,dim_head=dim_head,depth=depth,device=device)
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
