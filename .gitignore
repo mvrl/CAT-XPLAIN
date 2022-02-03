@@ -8,6 +8,8 @@ fold_cv_split.py
 logs/
 *.log
 *.pt
+MNIST_FMNIST/checkpoints/FashionMNIST/
+MNIST_FMNIST/checkpoints/MNIST/
 */checkpoints/*.pt
 */__pycache__/
 MRI/*.zip
