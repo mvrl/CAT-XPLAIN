@@ -36,9 +36,10 @@ def seed_initialize(seed = 12345):
   torch.manual_seed(SEED)
   torch.cuda.manual_seed(SEED)
 
-def train_eval(dataset_name, bb_model_type, sel_model_type, num_words,validation='without_test'):
+def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim_head,num_words,validation='without_test'):
   seed_initialize(seed = 12345)
   batch_size = 64
+  emd_dim = 128
   trainloader, traincount, valloader, validcount, testloader, testcount, vectors, vocab = get_imdb(batch_size=batch_size, max_length=max_length,emb_dim=emb_dim,device=device)
   print("For dataset:",dataset_name)
   print("For Experiment with bb_model:",bb_model_type)
@@ -49,7 +50,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_words,validation
   k = max_length - int(num_words)# number of words for S_bar
   
   ## Initialize Base model
-  bb_model = initialize_model(model_type=bb_model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,emb_dim=emb_dim,device=device)
+  bb_model = initialize_model(model_type=bb_model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,emb_dim=emb_dim,dim_head=dim_head,depth=depth,device=device)
 
   LossFunc_basemodel = torch.nn.CrossEntropyLoss(size_average = True)
   optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
@@ -86,7 +87,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, num_words,validation
   for iter_num in range(num_init):
     # intantiating the gumbel_selector or in other words initializing the explainer's weights
     ## Initialize Selection model
-    selector = initialize_model(model_type=sel_model_type,vocab_emb=vectors,num_classes=max_length,max_length=max_length,emb_dim=emb_dim,device=device)
+    selector = initialize_model(model_type=sel_model_type,vocab_emb=vectors,num_classes=max_length,max_length=max_length,emb_dim=emb_dim,dim_head=dim_head,depth=depth,device=device)
     #optimizer
     optimizer = torch.optim.Adam(selector.parameters(),lr = lr)
     
@@ -177,30 +178,21 @@ if  __name__ == '__main__':
     parser.add_argument('--bb_model_type', type=str,help="Base_model type: Options:[transformer]",default="transformer")
     parser.add_argument('--sel_model_type', type=str,help="select_model type: Options:[transformer]",default="transformer")
     parser.add_argument('--num_words',  type=str,help="frac for number of words to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
+    parser.add_argument('--depth',  type=str,help="depth of the transformer block: Options[1,2,4,8,10]", default= "8")
+    parser.add_argument('--dim_head',  type=str,help="dimension of hidden state: Options[64,128,256,512]", default= "128")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     parser.add_argument('--sweep', type=str,help="select_model type: Options:[sweep,no_sweep]",default="no_sweep")
     args = parser.parse_args()
 
     validation = args.validation
     num_words = float(args.num_words)
-    HyperParameters = edict()
-    HyperParameters.dataset_name = ["imdb"]
-    HyperParameters.bb_model_type = ["transformer"]
-    HyperParameters.sel_model_type = ["transformer"]
-    HyperParameters.params = [HyperParameters.dataset_name, HyperParameters.bb_model_type,HyperParameters.sel_model_type]
-    params = list(itertools.product(*HyperParameters.params))
-    if args.sweep == "sweep":
-      for hp in params:
-        dataset_name = hp[0]
-        bb_model_type = hp[1]
-        sel_model_type = hp[2]
-        print("For parameters:(dataset_name, BaseModel,Selector)",hp)
-        train_eval(dataset_name, bb_model_type, sel_model_type,num_words,validation)
-    else:
-      dataset_name = args.dataset_name
-      bb_model_type = args.bb_model_type
-      sel_model_type = args.sel_model_type
-      train_eval(dataset_name, bb_model_type, sel_model_type,num_words,validation)
-
-
-
+    depth = int(args.depth)
+    dim_head = int(args.dim_head)
+    dataset_name = args.dataset_name
+    bb_model_type = args.bb_model_type
+    sel_model_type = args.sel_model_type
+    
+    train_eval(dataset_name=dataset_name, bb_model_type=bb_model_type, 
+              sel_model_type=sel_model_type, depth=depth,
+               dim_head=dim_head,num_words=num_words,validation=validation)
+    

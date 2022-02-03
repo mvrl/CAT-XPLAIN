@@ -43,11 +43,12 @@ test_acc_list = []
 test_ice_list = []
 
 
-def train_eval(dataset_name,loss_weight,num_words,validation):
+def train_eval(dataset_name,loss_weight,depth,dim_head,num_words,validation):
   seed_initialize(seed = 12345)
   num_words = int(num_words*max_length)
   k = max_length - int(num_words)# number of words for S_bar
   batch_size = 64
+  emb_dim = 128
   ###################################### LOAD DATASET ######################################################
   trainloader, traincount, valloader, validcount, testloader, testcount, vectors, vocab = get_imdb(batch_size=batch_size, max_length=max_length,emb_dim=emb_dim,device=device)
 
@@ -67,7 +68,7 @@ def train_eval(dataset_name,loss_weight,num_words,validation):
   # mean and standard deviation of the metrics ph_acc and ICE.
   for iter_num in range(num_init):
       model_type = 'exptransformer'
-      bb_model = initialize_model(model_type=model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,emb_dim=emb_dim,device=device)
+      bb_model = initialize_model(model_type=model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,emb_dim=emb_dim,dim_head=dim_head,depth=depth,device=device)
       
       selector = bb_model
       LossFunc = torch.nn.CrossEntropyLoss(size_average = True)
@@ -156,11 +157,16 @@ if  __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[imdb]", default= 'imdb')
     parser.add_argument('--loss_weight',  type=str,help="weight assigned to selection loss", default= "0.9")
+    parser.add_argument('--depth',  type=str,help="depth of the transformer block: Options[1,2,4,8,10]", default= "8")
+    parser.add_argument('--dim_head',  type=str,help="dimension of hidden state: Options[64,128,256,512]", default= "128")
     parser.add_argument('--num_words',  type=str,help="frac for number of words to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     args = parser.parse_args()
     dataset_name = args.dataset_name
     num_words = float(args.num_words)
     loss_weight = float(args.loss_weight)
-    validation = args.validation  
-    train_eval(dataset_name,loss_weight,num_words,validation)
+    depth = int(args.depth)
+    dim_head = int(args.dim_head)
+    validation = args.validation 
+
+    train_eval(dataset_name=dataset_name,loss_weight=loss_weight,depth=depth,dim_head=dim_head,num_words=num_words,validation=validation)
