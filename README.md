@@ -13,15 +13,15 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 4.  `conda activate CAT-XPLAIN`
 5. Run the post-hoc experiment for MNIST or FMNIST datasets
 
-    `python ./MNIST_FMNIST/post_hoc.py --num_patches 0.25 --validation "with_test" --bb_model_type "ViT" --sel_model_type "ViT" --dataset_name "mnist"`
+    `python ./MNIST_FMNIST/post_hoc.py --num_patches "0.25" --validation "with_test"  --dataset_name "mnist" --depth 2 --dim 256`
 
-    `python ./MNIST_FMNIST/post_hoc.py --num_patches 0.25 --validation "with_test" --bb_model_type "ViT" --sel_model_type "ViT" --dataset_name "fmnist"`
+    `python ./MNIST_FMNIST/post_hoc.py --num_patches "0.25" --validation "with_test"  --dataset_name "fmnist" --depth 2 --dim 512`
 
 6. Run the Interpretable transformer for MNIST or FMNIST datasets
 
-    `python ./MNIST_FMNIST/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9 --dataset_name "mnist"`
+    `python ./MNIST_FMNIST/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.60 --depth 2 --dim 256 --dataset_name "mnist"`
 
-    `python ./MNIST_FMNIST/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9 --dataset_name "fmnist"`
+    `python ./MNIST_FMNIST/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.60  --depth 2 --dim 512 --dataset_name "fmnist"`
 
 ### Steps (for IMDB dataset)
 1. Run the post-hoc experiment 

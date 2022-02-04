@@ -198,7 +198,7 @@ if  __name__ == '__main__':
     parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[fmnist, mnist]", default= 'mnist')
     parser.add_argument('--bb_model_type', type=str,help="Base_model type: Options:[ViT]",default="ViT")
     parser.add_argument('--sel_model_type', type=str,help="select_model type: Options:[ViT]",default="ViT")
-    parser.add_argument('--depth',  type=str,help="depth of the transformer block: Options[1,2,4,8,10]", default= "8")
+    parser.add_argument('--depth',  type=str,help="depth of the transformer block: Options[1,2,4,8,10]", default= "2")
     parser.add_argument('--dim',  type=str,help="dimension of hidden state: Options[64,128,256,512]", default= "128")
     parser.add_argument('--num_patches',  type=str,help="frac for number of patches to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
