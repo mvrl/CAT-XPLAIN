@@ -31,15 +31,17 @@ def datapoints_counter(data_iter):
   return text_count
 
 
-def get_imdb(batch_size=64, max_length=250,emb_dim=30,device='cpu'):
-# Adapted from from https://github.com/PrideLee/sentiment-analysis/blob/6637f8f9dfb44308ca47a3e92fcdd7638e62a485/transformer/dataloader.py
+def get_imdb(batch_size=64, max_length=250,emb_dim=50,device='cpu'):
+# Taken from https://github.com/PrideLee/sentiment-analysis/blob/master/transformer/dataloader.py
   tokenizer = get_tokenizer('basic_english')
   TEXT = torchtext.legacy.data.Field(lower=True, include_lengths=True, batch_first=True, tokenize=tokenizer, fix_length=max_length)
   LABEL = torchtext.legacy.data.Field(sequential=False, unk_token=None, pad_token=None)
   train_set, test_set = torchtext.legacy.datasets.IMDB.splits(TEXT, LABEL)
   train_set, valid_set = torchtext.legacy.data.Dataset.split(train_set,split_ratio=0.85, stratified=False, strata_field='label', random_state=None)
 
-  TEXT.build_vocab(train_set, vectors=GloVe(name='6B', dim=emb_dim, max_vectors=500000))
+  TEXT.build_vocab(train_set, vectors=GloVe(name='6B', dim=emb_dim, max_vectors=50000))
+  #TEXT.build_vocab(train_set, vectors=torchtext.vocab.FastText(language='en'))
+  language='en'
   LABEL.build_vocab(train_set)
 
   # print vocab information
@@ -199,7 +201,7 @@ def train_basemodel(trainloader,valloader,bb_model,LossFunc,optimizer,num_epochs
 
         predictions = outputs.argmax(dim=1, keepdim=True).squeeze()
         correct = (predictions == target).sum().item()
-        accuracy = correct / batch_size
+        accuracy = correct / len(predictions)
         
         loss.backward()
         optimizer.step()
@@ -217,7 +219,7 @@ def train_basemodel(trainloader,valloader,bb_model,LossFunc,optimizer,num_epochs
         valid_loss.append(valloss.item())
         predictions = outputs.argmax(dim=1, keepdim=True).squeeze()
         correct = (predictions == target).sum().item()
-        accuracy = correct / batch_size
+        accuracy = correct / len(predictions)
         vtepoch.set_postfix(loss=valloss.item(), accuracy=100. * accuracy)
     
     # print training/validation statistics 

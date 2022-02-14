@@ -256,7 +256,7 @@ def train_basemodel(cls,trainloader,valloader,bb_model,LossFunc,optimizer,num_ep
 
         predictions = outputs.argmax(dim=1, keepdim=True).squeeze()
         correct = (predictions == target).sum().item()
-        accuracy = correct / batch_size
+        accuracy = correct / len(predictions)
         
         loss.backward()
         optimizer.step()
@@ -274,7 +274,7 @@ def train_basemodel(cls,trainloader,valloader,bb_model,LossFunc,optimizer,num_ep
         valid_loss.append(valloss.item())
         predictions = outputs.argmax(dim=1, keepdim=True).squeeze()
         correct = (predictions == target).sum().item()
-        accuracy = correct / batch_size
+        accuracy = correct / len(predictions)
         vtepoch.set_postfix(loss=valloss.item(), accuracy=100. * accuracy)
     
     # print training/validation statistics 
