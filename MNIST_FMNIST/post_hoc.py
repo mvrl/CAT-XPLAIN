@@ -169,7 +169,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type,depth,dim,num_patches
     best_model.load_state_dict(checkpoint['model_state_dict'])
 
     ## Initialize base blackbox model
-    bb_checkpoint = torch.load(checkpoint_path+'_model.pt')
+    bb_checkpoint = torch.load(checkpoint_path+'/'+dataset_name+'_model.pt')
     bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
