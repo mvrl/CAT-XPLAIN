@@ -56,7 +56,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim,num_words
   optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
 
   # train the basemodel 
-  bb_model = train_basemodel(trainloader,valloader,bb_model,
+  bb_model = train_basemodel(dataset_name,trainloader,valloader,bb_model,
             LossFunc_basemodel,optimizer_basemodel,num_epochs,batch_size,checkpoint_path)
 
   # testing the model on held-out validation dataset

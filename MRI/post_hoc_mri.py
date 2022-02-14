@@ -91,7 +91,7 @@ def train_eval(dataset_name,view_type,bb_model_type,sel_model_type,depth,dim,num
     optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
 
     # train the basemodel 
-    bb_model = train_basemodel(cls,trainloader,
+    bb_model = train_basemodel(dataset_name,cls,trainloader,
                   valloader,
                   bb_model,
                   LossFunc_basemodel,

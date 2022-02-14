@@ -233,7 +233,7 @@ def metrics(cls,selector,k,M,N,init_num,valloader,imgs_with_random_patch,bb_mode
   return ph_acc,ACE.cpu()
 
 
-def train_basemodel(cls,trainloader,valloader,bb_model,LossFunc,optimizer,num_epochs,batch_size,checkpoint_path):
+def train_basemodel(data_type,cls,trainloader,valloader,bb_model,LossFunc,optimizer,num_epochs,batch_size,checkpoint_path):
   train_loss = []
   valid_loss = []
   avg_train_losses = []
@@ -300,7 +300,7 @@ def train_basemodel(cls,trainloader,valloader,bb_model,LossFunc,optimizer,num_ep
             'epoch': epoch,
             'model_state_dict': bb_model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            },checkpoint_path+'_model.pt')
+            },checkpoint_path+'/'+data_type+'_model.pt')
 
   return bb_model 
 

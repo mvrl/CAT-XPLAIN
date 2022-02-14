@@ -177,7 +177,7 @@ def metrics(selector,k,init_num,valloader,bb_model,max_length,num_words,intrinsi
 
 
 
-def train_basemodel(trainloader,valloader,bb_model,LossFunc,optimizer,num_epochs,batch_size,checkpoint_path):
+def train_basemodel(data_type,trainloader,valloader,bb_model,LossFunc,optimizer,num_epochs,batch_size,checkpoint_path):
   train_loss = []
   valid_loss = []
   avg_train_losses = []
@@ -245,7 +245,7 @@ def train_basemodel(trainloader,valloader,bb_model,LossFunc,optimizer,num_epochs
             'epoch': epoch,
             'model_state_dict': bb_model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            },checkpoint_path+'_model.pt')
+            },checkpoint_path+'/'+data_type+'_model.pt')
 
   return bb_model 
 
@@ -269,7 +269,7 @@ def test_basemodel(valloader,bb_model):
         correct_count += 1
       all_count += 1
 
-  print("Number Of Images Tested =", all_count)
+  print("Number Of text reviews Tested =", all_count)
   print("Model Accuracy =", (correct_count/all_count)) 
 
 
