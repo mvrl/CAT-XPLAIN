@@ -21,6 +21,8 @@ dependencies:
   - yaml=0.2.5
   - zip=3.0
   - zipp=3.6.0
+  - nltk=3.6.5
+  - sentence-transformers=2.2.0
   - pip:
     - captum==0.4.0
     - docopt==0.6.2
