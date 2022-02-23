@@ -15,7 +15,7 @@ import torch.nn.functional as F
 import random
 from joblib import dump, load
 from tqdm import tqdm
-from text_utils import num2sents, get_imdb, text_with_random_sentence_generator, random_mask_generator, sample_concrete, generate_xs_text, metrics
+from text_utils import text_with_random_sentence_generator, random_mask_generator, sample_concrete, generate_xs_text, metrics
 from text_utils import train_basemodel, test_basemodel, initialize_model, custom_loss
 from config import *
 import os
@@ -44,13 +44,13 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim,num_sents
   k = max_length - int(num_sents)# number of sents for S_bar
 
   train_dataset = Dataset_IMDB_sentence(data_file='IMDB_train.csv', num_sentences = num_sents)
-  trainloader = torch.utils.data.DataLoader(train_dataset, num_workers=8, batch_size=batch_size, shuffle=True, drop_last=True)
+  trainloader = torch.utils.data.DataLoader(train_dataset, num_workers=0, batch_size=batch_size, shuffle=True, drop_last=True)
 
   val_dataset = Dataset_IMDB_sentence(data_file='IMDB_val.csv', num_sentences = num_sents)
-  valloader = torch.utils.data.DataLoader(val_dataset, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+  valloader = torch.utils.data.DataLoader(val_dataset, num_workers=0, batch_size=batch_size, shuffle=False, drop_last=True)
 
   test_dataset = Dataset_IMDB_sentence(data_file='IMDB_test.csv', num_sentences = num_sents)
-  testloader = torch.utils.data.DataLoader(test_dataset, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+  testloader = torch.utils.data.DataLoader(test_dataset, num_workers=0, batch_size=batch_size, shuffle=False, drop_last=True)
 
   print("For dataset:",dataset_name)
   print("For Experiment with bb_model:",bb_model_type)
@@ -60,7 +60,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim,num_sents
   
   
   ## Initialize Base model
-  bb_model = initialize_model(model_type=bb_model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,dim=dim,depth=depth,device=device)
+  bb_model = initialize_model(model_type=bb_model_type,num_classes=num_classes,max_length=max_length,dim=dim,depth=depth,device=device)
 
   LossFunc_basemodel = torch.nn.CrossEntropyLoss(size_average = True)
   optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
@@ -97,7 +97,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim,num_sents
   for iter_num in range(num_init):
     # intantiating the gumbel_selector or in other sents initializing the explainer's weights
     ## Initialize Selection model
-    selector = initialize_model(model_type=sel_model_type,vocab_emb=vectors,num_classes=max_length,max_length=max_length,dim=dim,depth=depth,device=device)
+    selector = initialize_model(model_type=sel_model_type,num_classes=max_length,max_length=max_length,dim=dim,depth=depth,device=device)
     #optimizer
     optimizer = torch.optim.Adam(selector.parameters(),lr = lr)
     
@@ -107,9 +107,9 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim,num_sents
     for epoch in range(num_epochs):  
         running_loss = 0
         i = 0
-        for item in trainloader:
-            X = item.text[0].to(device)
-            Y = item.label.long().to(device)
+        for item, label in trainloader:
+            X = item.to(device)
+            Y = label.long().to(device)
             batch_size = X.size(0)
             # zero the parameter gradients
             optimizer.zero_grad()
@@ -153,13 +153,13 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim,num_sents
     
     best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_posthoc_selector.pt')
     ## Initialize Selection model
-    best_model = initialize_model(model_type=sel_model_type,vocab_emb=vectors,num_classes=max_length,max_length=max_length,dim=dim,depth=depth,device=device)
+    best_model = initialize_model(model_type=sel_model_type,num_classes=max_length,max_length=max_length,dim=dim,depth=depth,device=device)
     checkpoint = torch.load(best_model_path)
     best_model.load_state_dict(checkpoint['model_state_dict'])
 
     ## Initialize base blackbox model
     bb_checkpoint = torch.load(checkpoint_path+'/'+dataset_name+'_model.pt')
-    bb_model = initialize_model(model_type=bb_model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,dim=dim,depth=depth,device=device)
+    bb_model = initialize_model(model_type=bb_model_type,num_classes=num_classes,max_length=max_length,dim=dim,depth=depth,device=device)
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 

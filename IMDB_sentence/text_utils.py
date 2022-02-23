@@ -19,7 +19,7 @@ def datapoints_counter(data_iter):
   text_count = 0 
   for i in range(len(data_iter)):
     item = next(iter(data_iter))
-    for j in range(item.text[0].shape[0]):
+    for j in range(item.shape[0]):
       text_count+=1 # updating texr entry count
 
   return text_count
@@ -32,8 +32,8 @@ def text_with_random_sentence_generator(valloader,no_datapoints,max_length,num_s
     texts_with_random_sentence = np.zeros((num_init,num_validation_texts,max_length))
     text_count = 0
     for i in range(num_init):
-      for item in valloader:
-        one_batch = item.text[0]
+      for item, label in valloader:
+        one_batch = item
         for j in range(len(one_batch)):
           patch_selection_map = np.zeros(max_length)
           patch_selection_map[:num_sents] = 1
@@ -106,9 +106,9 @@ def metrics(selector,k,init_num,valloader,bb_model,max_length,num_sents,intrinsi
   #   bb_model = selector
   correct_count, all_count = 0, 0
   ICE = 0
-  for item in valloader:
-    one_batch = item.text[0]
-    batch_label = item.label
+  for item, label in valloader:
+    one_batch = item
+    batch_label = label
     for i in range(len(one_batch)):
       text = one_batch[i].unsqueeze(0).to(device)
       label = batch_label[i].to(device)
@@ -153,9 +153,9 @@ def train_basemodel(data_type,trainloader,valloader,bb_model,LossFunc,optimizer,
   for epoch in range(num_epochs):
     bb_model.train()
     with tqdm(trainloader, unit="batch") as tepoch:
-      for item in tepoch:
-        data = item.text[0].to(device)
-        target = item.label.long().to(device)
+      for item, label in tepoch:
+        data = item.to(device)
+        target = label.long().to(device)
         
         tepoch.set_description("Epoch "+str(epoch))
         
@@ -177,9 +177,9 @@ def train_basemodel(data_type,trainloader,valloader,bb_model,LossFunc,optimizer,
     
     bb_model.eval()
     with tqdm(valloader, unit="batch") as vtepoch:
-      for item in vtepoch:
-        data = item.text[0].to(device)
-        target = item.label.long().to(device)
+      for item, label in vtepoch:
+        data = item.to(device)
+        target = label.long().to(device)
         vtepoch.set_description("Epoch "+str(epoch))
         outputs = bb_model(data)
         valloss = LossFunc(outputs, target)
@@ -221,9 +221,9 @@ def train_basemodel(data_type,trainloader,valloader,bb_model,LossFunc,optimizer,
 def test_basemodel(valloader,bb_model):
   # testing the black box model performance on the entire validation dataset
   correct_count, all_count = 0, 0
-  for item in valloader:
-    data = item.text[0].to(device)
-    labels = item.label.long().to(device)
+  for item, label in valloader:
+    data = item.to(device)
+    labels = label.long().to(device)
     for i in range(len(labels)):
       text = data[i].to(device)
       text = text.unsqueeze(0)

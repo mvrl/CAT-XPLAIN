@@ -9,9 +9,9 @@ from config import imdb_data_path
 from sentence_transformers import SentenceTransformer
 import nltk
 from nltk.tokenize import sent_tokenize
-nltk.download('punkt',download_dir=imdb_data_path)
+#nltk.download('punkt',download_dir=imdb_data_path)
 nltk.data.path.append(imdb_data_path)
-sent_emb_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2') #dim 384
+sent_emb_model = SentenceTransformer(os.path.join(imdb_data_path,'all-MiniLM-L6-v2')) #dim 384
 # All options can be seen in https://www.sbert.net/docs/pretrained_models.html
 pad_sentence = "##### #####"
 label_dict = {'neg':0,'pos':1}
@@ -35,11 +35,10 @@ class Dataset_IMDB_sentence(Dataset):
         return len(self.reviews)
     def __getitem__(self,idx):
         review = self.reviews[idx]
-        label =  label_dict[self.labels[idx]]
-        sent_count =  self.counts[idx]      
+        label =  label_dict[self.labels[idx]]      
         sentences = sent_tokenize(review)
         if len(sentences) < 50:
             sentences = sentences + [pad_sentence]*(50-len(sentences))
-        sentence_embeddings = model.encode(sentences)
+        sentence_embeddings = sent_emb_model.encode(sentences)
 
         return torch.tensor(sentence_embeddings), int(label)

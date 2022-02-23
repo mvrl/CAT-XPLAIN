@@ -11,7 +11,7 @@ import random
 from joblib import dump, load
 from tqdm import tqdm
 from text_models import modifiedTextTransformer 
-from text_utils import num2sents, get_imdb, random_mask_generator, text_with_random_sentence_generator, sample_concrete, generate_xs_text, metrics, initialize_model, custom_loss
+from text_utils import random_mask_generator, text_with_random_sentence_generator, sample_concrete, generate_xs_text, metrics, initialize_model, custom_loss
 from config import *
 import os
 from imdb_dataloader import Dataset_IMDB_sentence
@@ -50,17 +50,16 @@ def train_eval(dataset_name,loss_weight,depth,dim,num_sents,validation):
   k = max_length - int(num_sents)# number of sents for S_bar
   batch_size = 64
   ###################################### LOAD DATASET ######################################################
-  num_sents = int(num_sents*max_length)
-  k = max_length - int(num_sents)# number of sents for S_bar
+ 
 
   train_dataset = Dataset_IMDB_sentence(data_file='IMDB_train.csv', num_sentences = num_sents)
-  trainloader = torch.utils.data.DataLoader(train_dataset, num_workers=8, batch_size=batch_size, shuffle=True, drop_last=True)
+  trainloader = torch.utils.data.DataLoader(train_dataset, num_workers=0, batch_size=batch_size, shuffle=True, drop_last=True)
 
   val_dataset = Dataset_IMDB_sentence(data_file='IMDB_val.csv', num_sentences = num_sents)
-  valloader = torch.utils.data.DataLoader(val_dataset, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+  valloader = torch.utils.data.DataLoader(val_dataset, num_workers=0, batch_size=batch_size, shuffle=False, drop_last=True)
 
   test_dataset = Dataset_IMDB_sentence(data_file='IMDB_test.csv', num_sentences = num_sents)
-  testloader = torch.utils.data.DataLoader(test_dataset, num_workers=8, batch_size=batch_size, shuffle=False, drop_last=True)
+  testloader = torch.utils.data.DataLoader(test_dataset, num_workers=0, batch_size=batch_size, shuffle=False, drop_last=True)
 
   ##########################################################################################################################################################
   ################################################# RANDOM PATCH SELECTED DATASET CREATOR ##################################################################
@@ -92,9 +91,9 @@ def train_eval(dataset_name,loss_weight,depth,dim,num_sents,validation):
       for epoch in range(num_epochs):  
         running_loss = 0
         i = 0
-        for item in trainloader:
-          X = item.text[0].to(device)
-          Y = item.label.long().to(device)
+        for item, label in  trainloader:
+          X =item.to(device)
+          Y = label.long().to(device)
           batch_size = X.size(0)
         # zero the parameter gradients
           optimizer.zero_grad()
@@ -137,7 +136,7 @@ def train_eval(dataset_name,loss_weight,depth,dim,num_sents,validation):
       print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
       print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
       best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector.pt')
-      best_model = initialize_model(model_type=model_type,vocab_emb=vectors,num_classes=num_classes,max_length=max_length,dim=dim,depth=depth,device=device)
+      best_model = initialize_model(model_type=model_type,num_classes=num_classes,max_length=max_length,dim=dim,depth=depth,device=device)
       
       checkpoint = torch.load(best_model_path)
       best_model.load_state_dict(checkpoint['model_state_dict'])

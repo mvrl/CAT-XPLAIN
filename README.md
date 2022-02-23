@@ -37,13 +37,17 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
     `wget https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz -P path_to_storage_folder`
 2. Unzip the file
     `tar -xvf path_to_storage_folder/aclImdb_v1.tar.gz -C path_to_storage_folder`
-3. Prep data: Merge train-test, split train/val/test, pad data instances.
+3. Prep data: Merge train-test, split train/val/test ratio 0.70:0.10:0.20; sentence counts: 10 to 50. 
     `python ./IMDB_sentence/data_prep.py`
 
-4. Run the post-hoc experiment 
+4. Download one hugging face sentence transformer model for embedding sentences.
+    Information about all options can be seen in [Hugging face pretained models](https://www.sbert.net/docs/pretrained_models.html)
+    `git clone https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2 path_to_storage_folder`
+
+5. Run the post-hoc experiment 
     `python ./IMDB_sentence/post_hoc_imdb.py --num_sents 0.25 --validation "with_test" --bb_model_type "transformer" --sel_model_type "transformer"`
 
-5. Run the Interpretable transformer for IMDB dataset
+6. Run the Interpretable transformer for IMDB dataset
 
     `python ./IMDB_sentence/interpretable_transformer_imdb.py --num_sents 0.25 --validation "with_test" --loss_weight 0.9`
 
