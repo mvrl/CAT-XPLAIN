@@ -154,7 +154,7 @@ def train_basemodel(data_type,trainloader,valloader,bb_model,LossFunc,optimizer,
     bb_model.train()
     with tqdm(trainloader, unit="batch") as tepoch:
       for item, label in tepoch:
-        data = item.to(device)
+        data = item.float().to(device)
         target = label.long().to(device)
         
         tepoch.set_description("Epoch "+str(epoch))
@@ -178,7 +178,7 @@ def train_basemodel(data_type,trainloader,valloader,bb_model,LossFunc,optimizer,
     bb_model.eval()
     with tqdm(valloader, unit="batch") as vtepoch:
       for item, label in vtepoch:
-        data = item.to(device)
+        data = item.float().to(device)
         target = label.long().to(device)
         vtepoch.set_description("Epoch "+str(epoch))
         outputs = bb_model(data)
@@ -222,7 +222,7 @@ def test_basemodel(valloader,bb_model):
   # testing the black box model performance on the entire validation dataset
   correct_count, all_count = 0, 0
   for item, label in valloader:
-    data = item.to(device)
+    data = item.float().to(device)
     labels = label.long().to(device)
     for i in range(len(labels)):
       text = data[i].to(device)
