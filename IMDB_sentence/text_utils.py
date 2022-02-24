@@ -240,16 +240,16 @@ def test_basemodel(valloader,bb_model):
   print("Model Accuracy =", (correct_count/all_count)) 
 
 
-def initialize_model(model_type,dim,depth,num_classes,max_length,device):
+def initialize_model(model_type,emb_dim,dim,depth,num_classes,max_length,device,train_emb):
     if model_type == 'transformer':
-        model = TextTransformer(num_classes =num_classes, max_length=max_length, dim=dim, 
+        model = TextTransformer(num_classes =num_classes, max_length=max_length, emb_dim=emb_dim,dim=dim, 
                 depth=depth, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = 64, dropout = 0.,
-                emb_dropout = 0.).to(device)
+                emb_dropout = 0.,train_emb = True).to(device)
     if model_type == 'exptransformer':
-        model = modifiedTextTransformer(num_classes = num_classes, max_length=max_length,
+        model = modifiedTextTransformer(num_classes = num_classes, max_length=max_length, emb_dim = emb_dim,
                 dim=dim, depth=depth, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = 64,
-                dropout = 0., emb_dropout = 0.,explain=True).to(device)
-    return model.double()
+                dropout = 0., emb_dropout = 0.,explain=True,train_emb = True).to(device)
+    return model#.double()
 
 
 

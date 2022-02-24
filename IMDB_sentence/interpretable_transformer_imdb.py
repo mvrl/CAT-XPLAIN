@@ -44,7 +44,7 @@ test_acc_list = []
 test_ice_list = []
 
 
-def train_eval(dataset_name,loss_weight,depth,dim,num_sents,validation):
+def train_eval(dataset_name,loss_weight,depth,dim,num_sents,validation,train_emb):
   seed_initialize(seed = 12345)
   num_sents = int(num_sents*max_length)
   k = max_length - int(num_sents)# number of sents for S_bar
@@ -77,7 +77,7 @@ def train_eval(dataset_name,loss_weight,depth,dim,num_sents,validation):
   # mean and standard deviation of the metrics ph_acc and ICE.
   for iter_num in range(num_init):
       model_type = 'exptransformer'
-      bb_model = initialize_model(model_type=model_type,num_classes=num_classes,max_length=max_length,dim=dim,depth=depth,device=device)
+      bb_model = initialize_model(model_type=model_type,num_classes=num_classes,max_length=max_length,emb_dim=emb_dim,dim=dim,depth=depth,device=device,train_emb = train_emb)
       
       selector = bb_model
       LossFunc = torch.nn.CrossEntropyLoss(size_average = True)
@@ -136,7 +136,7 @@ def train_eval(dataset_name,loss_weight,depth,dim,num_sents,validation):
       print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
       print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
       best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector.pt')
-      best_model = initialize_model(model_type=model_type,num_classes=num_classes,max_length=max_length,dim=dim,depth=depth,device=device)
+      best_model = initialize_model(model_type=model_type,num_classes=num_classes,max_length=max_length,emb_dim=emb_dim, dim=dim,depth=depth,device=device,train_emb = train_emb)
       
       checkpoint = torch.load(best_model_path)
       best_model.load_state_dict(checkpoint['model_state_dict'])
@@ -167,7 +167,8 @@ if  __name__ == '__main__':
     parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[imdb]", default= 'imdb')
     parser.add_argument('--loss_weight',  type=str,help="weight assigned to selection loss", default= "0.9")
     parser.add_argument('--depth',  type=str,help="depth of the transformer block: Options[1,2,4,8,10]", default= "8")
-    parser.add_argument('--dim',  type=str,help="dimension of hidden state: based on what sentence transformer gives", default= "384")
+    parser.add_argument('--dim',  type=str,help="dimension of hidden state: options:[64,128,256,512]", default= "256")
+    parser.add_argument('--train_emb', type=str,help=" To train the embedding or not. Options:[true, false]",default="true")
     parser.add_argument('--num_sents',  type=str,help="frac for number of sentences to select: Options[0.05,0.10,0.15,0.20,0.25]", default= "0.05")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     args = parser.parse_args()
@@ -176,6 +177,8 @@ if  __name__ == '__main__':
     loss_weight = float(args.loss_weight)
     depth = int(args.depth)
     dim = int(args.dim)
+    emb_flag = {'true':True, 'false': False}
+    train_emb = emb_flag[args.train_emb]
     validation = args.validation 
 
-    train_eval(dataset_name=dataset_name,loss_weight=loss_weight,depth=depth,dim=dim,num_sents=num_sents,validation=validation)
+    train_eval(dataset_name=dataset_name,loss_weight=loss_weight,depth=depth,dim=dim,num_sents=num_sents,validation=validation,train_emb=train_emb)

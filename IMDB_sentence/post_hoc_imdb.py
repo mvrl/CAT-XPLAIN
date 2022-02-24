@@ -37,7 +37,7 @@ def seed_initialize(seed = 12345):
   torch.manual_seed(SEED)
   torch.cuda.manual_seed(SEED)
 
-def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim,num_sents,validation='without_test'):
+def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim,num_sents,validation,train_emb):
   seed_initialize(seed = 12345)
   batch_size = 64
   num_sents = int(num_sents*max_length)
@@ -60,7 +60,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim,num_sents
   
   
   ## Initialize Base model
-  bb_model = initialize_model(model_type=bb_model_type,num_classes=num_classes,max_length=max_length,dim=dim,depth=depth,device=device)
+  bb_model = initialize_model(model_type=bb_model_type,num_classes=num_classes,max_length=max_length,train_emb=train_emb,emb_dim=emb_dim,dim=dim,depth=depth,device=device)
 
   LossFunc_basemodel = torch.nn.CrossEntropyLoss(size_average = True)
   optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
@@ -97,7 +97,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim,num_sents
   for iter_num in range(num_init):
     # intantiating the gumbel_selector or in other sents initializing the explainer's weights
     ## Initialize Selection model
-    selector = initialize_model(model_type=sel_model_type,num_classes=max_length,max_length=max_length,dim=dim,depth=depth,device=device)
+    selector = initialize_model(model_type=sel_model_type,num_classes=max_length,max_length=max_length,train_emb=train_emb,emb_dim=emb_dim,dim=dim,depth=depth,device=device)
     #optimizer
     optimizer = torch.optim.Adam(selector.parameters(),lr = lr)
     
@@ -153,13 +153,13 @@ def train_eval(dataset_name, bb_model_type, sel_model_type, depth, dim,num_sents
     
     best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_posthoc_selector.pt')
     ## Initialize Selection model
-    best_model = initialize_model(model_type=sel_model_type,num_classes=max_length,max_length=max_length,dim=dim,depth=depth,device=device)
+    best_model = initialize_model(model_type=sel_model_type,num_classes=max_length,max_length=max_length,train_emb=train_emb,emb_dim=emb_dim,dim=dim,depth=depth,device=device)
     checkpoint = torch.load(best_model_path)
     best_model.load_state_dict(checkpoint['model_state_dict'])
 
     ## Initialize base blackbox model
     bb_checkpoint = torch.load(checkpoint_path+'/'+dataset_name+'_model.pt')
-    bb_model = initialize_model(model_type=bb_model_type,num_classes=num_classes,max_length=max_length,dim=dim,depth=depth,device=device)
+    bb_model = initialize_model(model_type=bb_model_type,num_classes=num_classes,max_length=max_length,train_emb=train_emb,emb_dim=emb_dim,dim=dim,depth=depth,device=device)
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
@@ -189,7 +189,8 @@ if  __name__ == '__main__':
     parser.add_argument('--sel_model_type', type=str,help="select_model type: Options:[transformer]",default="transformer")
     parser.add_argument('--num_sents',  type=str,help="frac for number of sents to select: Options[0.05,0.10,0.15,0.20,0.25]", default= "0.05")
     parser.add_argument('--depth',  type=str,help="depth of the transformer block: Options[1,2,4,8,10]", default= "8")
-    parser.add_argument('--dim',  type=str,help="dimension of hidden state: based on what sentence transformer gives", default= "384")
+    parser.add_argument('--dim',  type=str,help="dimension of hidden state: options:[64,128,256,512]", default= "128")
+    parser.add_argument('--train_emb', type=str,help=" To train the embedding or not. Options:[true, false]",default="true")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     parser.add_argument('--sweep', type=str,help="select_model type: Options:[sweep,no_sweep]",default="no_sweep")
     args = parser.parse_args()
@@ -198,11 +199,13 @@ if  __name__ == '__main__':
     num_sents = float(args.num_sents)
     depth = int(args.depth)
     dim = int(args.dim)
+    emb_flag = {'true':True, 'false': False}
+    train_emb = emb_flag[args.train_emb]
     dataset_name = args.dataset_name
     bb_model_type = args.bb_model_type
     sel_model_type = args.sel_model_type
     
     train_eval(dataset_name=dataset_name, bb_model_type=bb_model_type, 
               sel_model_type=sel_model_type, depth=depth,
-               dim=dim,num_sents=num_sents,validation=validation)
+               dim=dim,num_sents=num_sents,validation=validation,train_emb=train_emb)
     

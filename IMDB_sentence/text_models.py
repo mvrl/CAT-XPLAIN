@@ -81,11 +81,15 @@ class Transformer(nn.Module):
         return x
 
 class TextTransformer(nn.Module):
-    def __init__(self, *, num_classes, max_length, dim, depth, heads, mlp_dim, pool = 'cls', channels = 3, dim_head = 64, dropout = 0., emb_dropout = 0.):
+    def __init__(self, *, num_classes, max_length, emb_dim, dim, depth, heads, mlp_dim, pool = 'cls', channels = 3, dim_head = 64, dropout = 0., emb_dropout = 0.,train_emb=True):
         super().__init__()
 
         assert pool in {'cls', 'mean'}, 'pool type must be either cls (cls token) or mean (mean pooling)'
-
+        self.train_emb = train_emb
+        if self.train_emb:
+          self.to_embedding = nn.Linear(emb_dim, dim)
+        else:
+          dim = emb_dim
         self.pos_embedding = nn.Parameter(torch.randn(1, max_length + 1, dim))
         self.cls_token = nn.Parameter(torch.randn(1, 1, dim))
         self.dropout = nn.Dropout(emb_dropout)
@@ -105,6 +109,8 @@ class TextTransformer(nn.Module):
     def forward(self, x,mask=[]):
         b = x.shape[0]
         n = self.max_length
+        if self.train_emb:
+            x = self.to_embedding(x)
         if len(mask) != 0:
             mask = torch.tensor(mask).unsqueeze(2)
             mask = mask.expand(b,self.max_length,self.emb_dim)
@@ -123,12 +129,16 @@ class TextTransformer(nn.Module):
         return self.mlp_head(x)
 
 class modifiedTextTransformer(nn.Module):
-    def __init__(self, *, num_classes, max_length, dim, depth, heads, mlp_dim, pool = 'cls', channels = 3, dim_head = 64, dropout = 0., emb_dropout = 0.,explain=False,device='cpu'):
+    def __init__(self, *, num_classes, max_length, emb_dim, dim, depth, heads, mlp_dim, pool = 'cls', channels = 3, dim_head = 64, dropout = 0., emb_dropout = 0.,explain=False,device='cpu',train_emb=True):
         super().__init__()
         self.device = device
-        
+        self.train_emb = train_emb
         assert pool in {'cls', 'mean'}, 'pool type must be either cls (cls token) or mean (mean pooling)'
         
+        if self.train_emb:
+          self.to_embedding = nn.Linear(emb_dim, dim)
+        else:
+          dim = emb_dim
         self.explain = explain
         if self.explain:
             self.pos_embedding = nn.Parameter(torch.randn(1, max_length + 1 + 1, dim))
@@ -159,6 +169,8 @@ class modifiedTextTransformer(nn.Module):
     def forward(self, x,mask=[]):
         b = x.shape[0]
         n = self.max_length
+        if self.train_emb:
+            x = self.to_embedding(x)
         if len(mask) != 0:
             mask = torch.tensor(mask).unsqueeze(2)
             mask = mask.expand(b,self.max_length,self.emb_dim)
@@ -189,14 +201,8 @@ if __name__ == "__main__":
     batch_size = 64
     max_sents = 50
     one_batch = a = torch.rand(64,50,384)
-    model1 = TextTransformer(num_classes =2, max_length=max_sents, dim=384, depth=3, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = 64, dropout = 0., emb_dropout = 0.).to('cpu')
-    model2 = modifiedTextTransformer(num_classes =2, max_length=max_sents, dim=384, depth=3, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = 64, dropout = 0., emb_dropout = 0.,explain=True).to('cpu')
+    model1 = TextTransformer(num_classes =2, max_length=max_sents, emb_dim = 384, dim=128, depth=3, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = 64, dropout = 0., emb_dropout = 0.,train_emb = True).to('cpu')
+    model2 = modifiedTextTransformer(num_classes =2, max_length=max_sents, emb_dim=384, dim=128, depth=3, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = 64, dropout = 0., emb_dropout = 0.,explain=True,train_emb = True).to('cpu')
     
     print(model1.forward(one_batch).shape)
     print(model2.forward(one_batch)[0].shape, model2.forward(one_batch)[1].shape)
-
-
-
-
-
-
