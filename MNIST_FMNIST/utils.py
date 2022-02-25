@@ -36,16 +36,19 @@ def load_dataset(dataset_name='mnist'):
     train_set = vision_datasets.FashionMNIST(root=data_path, transform=ToTensor(), download=True, train=True)
     test_set = vision_datasets.FashionMNIST(root=data_path, transform=ToTensor(), download=True, train=False)
     cls = [0, 9]
+    cls = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
   if dataset_name == 'mnist':
     train_set = vision_datasets.MNIST(root=data_path, transform=ToTensor(), download=True, train=True)
     test_set = vision_datasets.MNIST(root=data_path, transform=ToTensor(), download=True, train=False)
     cls = [3, 8]
+    cls = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
   if dataset_name == 'imdb':
     train_set = text_datasets.IMDB(root=data_path, transform=ToTensor(), split='train')
     test_set = text_datasets.IMDB(root=data_path, transform=ToTensor(), split='test')
     cls = [0, 1]
+    cls = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
   # Before
   print('Train data set:', len(train_set))
@@ -74,6 +77,7 @@ def load_dataset(dataset_name='mnist'):
   test_datasize = mask_generator(test_set,cls)[1]
   print(train_datasize,valid_datasize,test_datasize)
   print(len(trainloader),len(valloader), len(testloader))
+  print("classes:",cls)
 
   return cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize
 

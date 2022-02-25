@@ -41,4 +41,4 @@ class Dataset_IMDB_sentence(Dataset):
             sentences = sentences + [pad_sentence]*(50-len(sentences))
         sentence_embeddings = sent_emb_model.encode(sentences)
 
-        return torch.tensor(sentence_embeddings), int(label)
+        return torch.tensor(sentence_embeddings).double(), int(label)

@@ -56,7 +56,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type,depth,dim,num_patches
   num_patches = int(num_patches*M*M)
   k = M*M-int(num_patches)# number of patches for S_bar
   ## Initialize Base model
-  bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
+  bb_model = initialize_model(bb_model_type,num_classes=num_classes,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
 
   LossFunc_basemodel = torch.nn.CrossEntropyLoss(size_average = True)
   optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
@@ -170,7 +170,7 @@ def train_eval(dataset_name, bb_model_type, sel_model_type,depth,dim,num_patches
 
     ## Initialize base blackbox model
     bb_checkpoint = torch.load(checkpoint_path+'/'+dataset_name+'_model.pt')
-    bb_model = initialize_model(bb_model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
+    bb_model = initialize_model(bb_model_type,num_classes=num_classes,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 

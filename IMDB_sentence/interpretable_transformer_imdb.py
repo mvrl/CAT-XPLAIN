@@ -92,7 +92,7 @@ def train_eval(dataset_name,loss_weight,depth,dim,num_sents,validation,train_emb
         running_loss = 0
         i = 0
         for item, label in  trainloader:
-          X =item.float().to(device)
+          X =item.to(device)
           Y = label.long().to(device)
           batch_size = X.size(0)
         # zero the parameter gradients

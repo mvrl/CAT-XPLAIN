@@ -111,7 +111,7 @@ def metrics(selector,k,init_num,valloader,bb_model,max_length,num_sents,intrinsi
     batch_label = label
     for i in range(len(one_batch)):
       text = one_batch[i].unsqueeze(0).to(device)
-      label = batch_label[i].to(device)
+      label = batch_label[i].long().to(device)
       selected_subset = generate_xs_text(text,selector,k,intrinsic=intrinsic).to(device)
       # xprime_subset = torch.tensor(texts_with_random_val[init_num][all_count]).unsqueeze(0).to(device)
       xprime_subset = torch.tensor(random_mask_generator(max_length,num_sents)).unsqueeze(0).to(device)
@@ -154,7 +154,7 @@ def train_basemodel(data_type,trainloader,valloader,bb_model,LossFunc,optimizer,
     bb_model.train()
     with tqdm(trainloader, unit="batch") as tepoch:
       for item, label in tepoch:
-        data = item.float().to(device)
+        data = item.to(device)
         target = label.long().to(device)
         
         tepoch.set_description("Epoch "+str(epoch))
@@ -178,7 +178,7 @@ def train_basemodel(data_type,trainloader,valloader,bb_model,LossFunc,optimizer,
     bb_model.eval()
     with tqdm(valloader, unit="batch") as vtepoch:
       for item, label in vtepoch:
-        data = item.float().to(device)
+        data = item.to(device)
         target = label.long().to(device)
         vtepoch.set_description("Epoch "+str(epoch))
         outputs = bb_model(data)
@@ -222,7 +222,7 @@ def test_basemodel(valloader,bb_model):
   # testing the black box model performance on the entire validation dataset
   correct_count, all_count = 0, 0
   for item, label in valloader:
-    data = item.float().to(device)
+    data = item.to(device)
     labels = label.long().to(device)
     for i in range(len(labels)):
       text = data[i].to(device)
@@ -249,7 +249,7 @@ def initialize_model(model_type,emb_dim,dim,depth,num_classes,max_length,device,
         model = modifiedTextTransformer(num_classes = num_classes, max_length=max_length, emb_dim = emb_dim,
                 dim=dim, depth=depth, heads=8, mlp_dim=256, pool = 'cls', channels =1, dim_head = 64,
                 dropout = 0., emb_dropout = 0.,explain=True,train_emb = True).to(device)
-    return model#.double()
+    return model.double()
 
 
 

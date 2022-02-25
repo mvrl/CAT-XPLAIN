@@ -74,7 +74,7 @@ def train_eval(dataset_name,loss_weight,depth,dim,num_patches,validation):
   # mean and standard deviation of the metrics ph_acc and ICE.
   for iter_num in range(num_init):
       model_type = 'expViT'
-      bb_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
+      bb_model = initialize_model(model_type,num_classes=num_classes,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
      
       selector = bb_model
       LossFunc = torch.nn.CrossEntropyLoss(size_average = True)
@@ -142,7 +142,7 @@ def train_eval(dataset_name,loss_weight,depth,dim,num_patches,validation):
       print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
       print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
       best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector.pt')
-      best_model = initialize_model(model_type,num_classes=2,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
+      best_model = initialize_model(model_type,num_classes=num_classes,input_dim=input_dim,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
      
       checkpoint = torch.load(best_model_path)
       best_model.load_state_dict(checkpoint['model_state_dict'])
