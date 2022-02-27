@@ -9,7 +9,13 @@ logs/
 *.log
 *.pt
 MNIST_FMNIST_CIFAR/checkpoints/
+<<<<<<< HEAD
+# MNIST_FMNIST_CIFAR/checkpoints/FashionMNIST/
+# MNIST_FMNIST_CIFAR/checkpoints/MNIST/
+=======
+>>>>>>> 9a07dcbd141954af6b7052a00f29e403be94a43e
 */checkpoints/*.pt
+
 */__pycache__/
 MRI/*.zip
 MRI/*/*.zip
