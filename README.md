@@ -11,28 +11,32 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 3. Create a virtual environment for the project.
     `conda env create -f environment.yml`
 4.  `conda activate CAT-XPLAIN`
-5. Run the post-hoc experiment for MNIST or FMNIST datasets
+5. Run the post-hoc experiment for MNIST or FMNIST or CIFAR datasets
 
-    `python ./MNIST_FMNIST/post_hoc.py --num_patches "0.25" --validation "with_test"  --dataset_name "mnist" --depth 2 --dim 256`
+    `python ./MNIST_FMNIST_CIFAR/post_hoc.py --num_patches "0.25" --validation "with_test"  --dataset_name "mnist" --depth 2 --dim 256`
 
-    `python ./MNIST_FMNIST/post_hoc.py --num_patches "0.25" --validation "with_test"  --dataset_name "fmnist" --depth 2 --dim 512`
+    `python ./MNIST_FMNIST_CIFAR/post_hoc.py --num_patches "0.25" --validation "with_test"  --dataset_name "fmnist" --depth 2 --dim 512`
 
-6. Run the Interpretable transformer for MNIST or FMNIST datasets
+    `python ./MNIST_FMNIST_CIFAR/post_hoc.py --num_patches "0.25" --validation "with_test"  --dataset_name "cifar" --depth 2 --dim 512`
 
-    `python ./MNIST_FMNIST/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.60 --depth 2 --dim 256 --dataset_name "mnist"`
+6. Run the Interpretable transformer for MNIST or FMNIST or CIFAR datasets
 
-    `python ./MNIST_FMNIST/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.60  --depth 2 --dim 512 --dataset_name "fmnist"`
+    `python ./MNIST_FMNIST_CIFAR/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.60 --depth 2 --dim 256 --dataset_name "mnist"`
 
-### Steps (for IMDB dataset)
+    `python ./MNIST_FMNIST_CIFAR/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.60  --depth 2 --dim 512 --dataset_name "fmnist"`
+
+    `python ./MNIST_FMNIST_CIFAR/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.60  --depth 2 --dim 512 --dataset_name "cifar"`
+
+<!-- ### Steps (for IMDB dataset)
 1. Run the post-hoc experiment 
     `python ./IMDB/post_hoc_imdb.py --num_words 0.25 --validation "with_test" --bb_model_type "transformer" --sel_model_type "transformer"`
 
 
 2. Run the Interpretable transformer for IMDB dataset
-    `python ./IMDB/interpretable_transformer_imdb.py --num_words 0.25 --validation "with_test" --loss_weight 0.9`
+    `python ./IMDB/interpretable_transformer_imdb.py --num_words 0.25 --validation "with_test" --loss_weight 0.9` -->
 
 
-### Steps (for IMDB_sentence experiment)
+<!-- ### Steps (for IMDB_sentence experiment)
 1. Download dataset 
     `wget https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz -P path_to_storage_folder`
 2. Unzip the file
@@ -49,11 +53,11 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 
 6. Run the Interpretable transformer for IMDB dataset
 
-    `python ./IMDB_sentence/interpretable_transformer_imdb.py --num_sents 0.25 --validation "with_test" --loss_weight 0.9`
+    `python ./IMDB_sentence/interpretable_transformer_imdb.py --num_sents 0.25 --validation "with_test" --loss_weight 0.9` -->
 
 
 
-### Steps (for ADNI MRI dataset)
+<!-- ### Steps (for ADNI MRI dataset)
 
 1. Download our preprocessed ADNI data and cv splits using the FILEIDS provided after access request at subash.khanal33@gmail.com
     
@@ -74,7 +78,7 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 
 4. Interpretable ViT experiment for MRI data
 
-    `python ./MRI/interpretable_transformer_mri.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9`
+    `python ./MRI/interpretable_transformer_mri.py --num_patches 0.25 --validation "with_test" --loss_weight 0.9` -->
 
 
 
