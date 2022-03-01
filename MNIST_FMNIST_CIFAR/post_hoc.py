@@ -166,7 +166,7 @@ def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,d
         val_ices.append(val_ice)
         if not os.path.exists(checkpoint_path):
           os.makedirs(checkpoint_path)
-        model_checkpoint = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(epoch)+'_posthoc_selector.pt')
+        model_checkpoint = os.path.join(checkpoint_path,dataset_name+'_'+str(num_classes)+'_'+dataset_name+str(iter_num)+'_'+str(epoch)+'_posthoc_selector.pt')
         torch.save({
             'epoch': epoch,
             'model_state_dict': selector.state_dict(),
@@ -182,14 +182,14 @@ def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,d
     print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
     print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
     
-    best_model_path = os.path.join(checkpoint_path,dataset_name+str(iter_num)+'_'+str(best_epoch)+'_posthoc_selector.pt')
+    best_model_path = os.path.join(checkpoint_path,dataset_name+'_'+str(num_classes)+'_'+dataset_name+str(iter_num)+'_'+str(best_epoch)+'_posthoc_selector.pt')
     ## Initialize Selection model
     best_model = initialize_model(sel_model_type,num_classes=M*M,input_dim=input_dim, channels=channels,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
     checkpoint = torch.load(best_model_path)
     best_model.load_state_dict(checkpoint['model_state_dict'])
 
     ## Initialize base blackbox model
-    bb_checkpoint = torch.load(checkpoint_path+'/'+data_type+'_class'+str(num_classes)+'_model.pt')
+    bb_checkpoint = torch.load(checkpoint_path+'/'+dataset_name+'_class'+str(num_classes)+'_model.pt')
     bb_model = initialize_model(bb_model_type,num_classes=num_classes,input_dim=input_dim, channels=channels,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
