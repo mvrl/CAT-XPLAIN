@@ -205,7 +205,7 @@ def metrics(cls,selector,k,M,N,init_num,valloader,imgs_with_random_patch,bb_mode
   num_classes = len(cls)
   # if intrinsic:
   #   bb_model = selector
-  correct_count, all_count, ph_correct_count = 0, 0, 0
+  correct_count, all_count, ph_correct_count, true_correct_count = 0, 0, 0, 0
   ICE, ICE_ph = 0,0
   for images,labels in valloader:
     for i in range(len(images)):
@@ -234,6 +234,9 @@ def metrics(cls,selector,k,M,N,init_num,valloader,imgs_with_random_patch,bb_mode
           correct_count += 1
       if(pred_label == pred_label_full):
           ph_correct_count += 1
+      if(true_label == pred_label_full):
+        true_correct_count += 1
+
     #ICE calc.    
       ICE +=out_xs[0][true_label]-out_xprime[0][true_label]
       ICE_ph +=out_xs[0][pred_label_full]-out_xprime[0][pred_label_full]
@@ -241,11 +244,12 @@ def metrics(cls,selector,k,M,N,init_num,valloader,imgs_with_random_patch,bb_mode
 
   acc = (correct_count/all_count)
   ph_acc = (ph_correct_count/all_count)
+  overall_acc = (true_correct_count/all_count)
   
   ACE=ICE/all_count
   ACE_ph =  ICE_ph/all_count  
 
-  return acc, ACE.cpu(), ph_acc, ACE_ph.cpu()
+  return acc, ACE.cpu(), ph_acc, ACE_ph.cpu(), overall_acc
 
 
 def train_basemodel(data_type,cls,trainloader,valloader,bb_model,LossFunc,optimizer,num_epochs,batch_size,checkpoint_path):

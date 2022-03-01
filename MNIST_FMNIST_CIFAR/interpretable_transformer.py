@@ -43,9 +43,11 @@ print(np.version.version)
 print(torch.__version__)
 print(device)
 
+val_true_acc_list = []
 val_acc_list = []
 val_ice_list = []
 
+test_true_acc_list = []
 test_acc_list = []
 test_ice_list = []
 
@@ -98,6 +100,7 @@ def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,vali
       #optimizer
       optimizer = torch.optim.Adam(selector.parameters(),lr = lr)
       # variable for keeping track of best ph_acc across different iterations 
+      val_true_accs = []
       val_accs = []
       val_ices = []
 
@@ -141,7 +144,8 @@ def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,vali
 
           running_loss+=loss.item() # sum to caluclate average loss per sample later
         
-        val_acc,val_ice,_,_ = metrics(cls, selector,k,M,N,iter_num,valloader,imgs_with_random_patch_val,selector,intrinsic=True)
+        val_acc,val_ice,_,_, val_true_acc = metrics(cls, selector,k,M,N,iter_num,valloader,imgs_with_random_patch_val,selector,intrinsic=True)
+        val_true_accs.append(val_true_acc)
         val_accs.append(val_acc)
         val_ices.append(val_ice)
         if not os.path.exists(checkpoint_path):
@@ -167,21 +171,24 @@ def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,vali
       checkpoint = torch.load(best_model_path)
       best_model.load_state_dict(checkpoint['model_state_dict'])
       optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-      test_acc,test_ice,_,_ = metrics(cls, best_model,k,M,N,iter_num,testloader,imgs_with_random_patch_test,best_model,intrinsic=True)
+      test_acc,test_ice,_,_,test_true_acc = metrics(cls, best_model,k,M,N,iter_num,testloader,imgs_with_random_patch_test,best_model,intrinsic=True)
       
       if validation == 'with_test':
-        print('test (ph acc, ICE):',(test_acc,test_ice))
+        print('test (ph acc, ICE, ACC):',(test_acc,test_ice, test_true_acc))
 
+      test_true_acc_list.append(test_true_acc)
       test_acc_list.append(test_acc)
       test_ice_list.append(test_ice)
 
         
   print('mean val ph acc: %.3f'%(np.mean(val_acc_list)),', std dev: %.3f '%(np.std(val_acc_list))) 
   print('mean val ICE: %.3f'%(np.mean(val_ice_list)),', std dev: %.3f '%(np.std(val_ice_list))) 
+  print('mean val true acc with whole input: %.3f'%(np.mean(val_true_acc_list)),', std dev: %.3f '%(np.std(val_true_acc_list))) 
 
   if validation == 'with_test':
     print('mean test ph acc: %.3f'%(np.mean(test_acc_list)),', std dev: %.3f '%(np.std(test_acc_list))) 
-    print('mean test ICE: %.3f'%(np.mean(test_ice_list)),', std dev: %.3f '%(np.std(test_ice_list))) 
+    print('mean test ICE: %.3f'%(np.mean(test_ice_list)),', std dev: %.3f '%(np.std(test_ice_list)))
+    print('mean test true acc with whole input: %.3f'%(np.mean(test_true_acc_list)),', std dev: %.3f '%(np.std(test_true_acc_list)))  
 
   print('\nDONE! \n')
 

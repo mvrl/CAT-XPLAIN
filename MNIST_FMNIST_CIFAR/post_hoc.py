@@ -161,7 +161,7 @@ def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,d
           
             running_loss+=loss.item() # average loss per sample
   ################################################################################
-        val_acc,val_ice,_,_ = metrics(cls,selector,k,M,N,iter_num,valloader,imgs_with_random_patch_val,bb_model)
+        val_acc,val_ice,_,_,_ = metrics(cls,selector,k,M,N,iter_num,valloader,imgs_with_random_patch_val,bb_model)
         val_accs.append(val_acc)
         val_ices.append(val_ice)
         if not os.path.exists(checkpoint_path):
@@ -194,7 +194,7 @@ def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,d
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
-    test_acc,test_ice, _, _ = metrics(cls,best_model,k,M,N,iter_num,testloader,imgs_with_random_patch_test,bb_model,intrinsic=False)
+    test_acc,test_ice, _, _,_ = metrics(cls,best_model,k,M,N,iter_num,testloader,imgs_with_random_patch_test,bb_model,intrinsic=False)
     
     if validation == 'with_test':
       print('test (ph acc, ICE):',(test_acc,test_ice))
