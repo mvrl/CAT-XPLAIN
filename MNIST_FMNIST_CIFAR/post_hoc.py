@@ -42,8 +42,12 @@ torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
 
 import sys
-def train_eval(dataset_name, bb_model_type, sel_model_type,depth,dim,num_patches,validation='without_test'):
-  cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize = load_dataset(dataset_name=dataset_name)
+def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,dim,num_patches,validation):
+  if dataset_class == 'full':
+      num_classes = 10
+  else:
+      num_classes = 2
+  cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize = load_dataset(dataset_name=dataset_name,dataset_class=dataset_class)
   print("For dataset:",dataset_name)
   print("For Experiment with bb_model:",bb_model_type)
   print("For Experiment with sel_model:",sel_model_type)
@@ -87,6 +91,9 @@ def train_eval(dataset_name, bb_model_type, sel_model_type,depth,dim,num_patches
   else:
     test_basemodel(cls,testloader,bb_model)
   print('Basemodel trained! \n')
+
+  if tuning:
+    sys.exit()
 
   ##############################################################
 
@@ -215,7 +222,7 @@ if  __name__ == '__main__':
     parser.add_argument('--dim',  type=str,help="dimension of hidden state: Options[64,128,256,512]", default= "128")
     parser.add_argument('--num_patches',  type=str,help="frac for number of patches to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
-    parser.add_argument('--sweep', type=str,help="select_model type: Options:[sweep,no_sweep]",default="no_sweep")
+    parser.add_argument('--dataset_class', type=str,help="select_model type: Options:[partial,full]",default="partial")
     args = parser.parse_args()
 
     validation = args.validation
@@ -225,7 +232,8 @@ if  __name__ == '__main__':
     sel_model_type = args.sel_model_type
     depth = int(args.depth)
     dim = int(args.dim)
+    dataset_class = args.dataset_class
 
-    train_eval(dataset_name=dataset_name,bb_model_type=bb_model_type, sel_model_type=sel_model_type,
-depth=depth,dim=dim,num_patches=num_patches,validation=validation)
+    train_eval(dataset_name=dataset_name,dataset_class=dataset_class,bb_model_type=bb_model_type, sel_model_type=sel_model_type,
+    depth=depth,dim=dim,num_patches=num_patches,validation=validation)
 

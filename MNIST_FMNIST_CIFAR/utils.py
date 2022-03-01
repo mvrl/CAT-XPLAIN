@@ -30,7 +30,7 @@ def mask_generator(dataset,cls):
   
   return mask, sum(mask)
 
-def load_dataset(dataset_name='mnist',dataset_class=dataset_class):
+def load_dataset(dataset_name='mnist',dataset_class="partial"):
 
   if dataset_name=='fmnist':
     train_set = vision_datasets.FashionMNIST(root=data_path, transform=ToTensor(), download=True, train=True)
@@ -202,6 +202,7 @@ This function calculates thes two metrics for evaluating the explanations
 '''
 def metrics(cls,selector,k,M,N,init_num,valloader,imgs_with_random_patch,bb_model,intrinsic=False):
   
+  num_classes = len(cls)
   # if intrinsic:
   #   bb_model = selector
   correct_count, all_count, ph_correct_count = 0, 0, 0
@@ -252,6 +253,7 @@ def train_basemodel(data_type,cls,trainloader,valloader,bb_model,LossFunc,optimi
   valid_loss = []
   avg_train_losses = []
   avg_valid_losses = []
+  num_classes = len(cls)
   #training loop
   for epoch in range(num_epochs):
     bb_model.train()
@@ -327,6 +329,7 @@ def train_basemodel(data_type,cls,trainloader,valloader,bb_model,LossFunc,optimi
 
 
 def test_basemodel(cls,valloader,bb_model):
+  num_classes = len(cls)
   # testing the black box model performance on the entire validation dataset
   correct_count, all_count = 0, 0
   for images,labels in valloader:

@@ -50,9 +50,12 @@ test_acc_list = []
 test_ice_list = []
 
 
-def train_eval(dataset_name,loss_weight,depth,dim,num_patches,validation):
+def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,validation):
   seed_initialize(seed = 12345)
-  
+  if dataset_class == 'full':
+      num_classes = 10
+  else:
+      num_classes = 2
   ###################################### LOAD DATASET ######################################################
   cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize = load_dataset(dataset_name=dataset_name)
 
@@ -193,13 +196,15 @@ if  __name__ == '__main__':
     parser.add_argument('--loss_weight',  type=str,help="weight assigned to selection loss", default= "0.60")
     parser.add_argument('--num_patches',  type=str,help="frac for number of patches to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
+    parser.add_argument('--dataset_class', type=str,help="select_model type: Options:[partial,full]",default="partial")
     args = parser.parse_args()
     dataset_name = args.dataset_name
     num_patches = float(args.num_patches)
     loss_weight = float(args.loss_weight)
     validation = args.validation 
     depth = int(args.depth)
-    dim = int(args.dim) 
+    dim = int(args.dim)
+    dataset_class = args.dataset_class 
 
-    train_eval(dataset_name=dataset_name,loss_weight=loss_weight,
+    train_eval(dataset_name=dataset_name,dataset_class=dataset_class,loss_weight=loss_weight,
             depth=depth,dim=dim,num_patches=num_patches,validation=validation)
