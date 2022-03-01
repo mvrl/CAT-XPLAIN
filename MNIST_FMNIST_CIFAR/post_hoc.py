@@ -57,8 +57,8 @@ def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,d
     input_dim = 32
     channels = 3
     # M*N x M*N is the size of the image
-    M = 8 # selection map size(assuming a square shaped selection map) 
-    N = 4 # patch size(square patch)
+    M = 4 # selection map size(assuming a square shaped selection map) 
+    N = 8 # patch size(square patch)
   else:
     input_dim = 28
     channels = 1
@@ -189,7 +189,7 @@ def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,d
     best_model.load_state_dict(checkpoint['model_state_dict'])
 
     ## Initialize base blackbox model
-    bb_checkpoint = torch.load(checkpoint_path+'/'+dataset_name+'_model.pt')
+    bb_checkpoint = torch.load(checkpoint_path+'/'+data_type+'_class'+str(num_classes)+'_model.pt')
     bb_model = initialize_model(bb_model_type,num_classes=num_classes,input_dim=input_dim, channels=channels,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])

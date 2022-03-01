@@ -25,4 +25,4 @@ lr = 0.0001
 best_val_acc = 0
 num_init = 3 #number of initializations of the explainer
 
-tuning = True # Default: False. Wether to stop once the black box model is trained or not
+tuning = False # Default: False. Wether to stop once the black box model is trained or not

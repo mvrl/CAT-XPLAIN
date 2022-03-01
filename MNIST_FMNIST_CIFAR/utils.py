@@ -322,7 +322,7 @@ def train_basemodel(data_type,cls,trainloader,valloader,bb_model,LossFunc,optimi
             'epoch': epoch,
             'model_state_dict': bb_model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            },checkpoint_path+'/'+data_type+'_model.pt')
+            },checkpoint_path+'/'+data_type+'_class'+str(num_classes)+'_model.pt')
 
   return bb_model 
 
