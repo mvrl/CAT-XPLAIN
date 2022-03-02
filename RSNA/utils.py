@@ -250,7 +250,7 @@ def metrics(cls,selector,k,M,N,init_num,valloader,imgs_with_random_patch,bb_mode
   return acc, ACE.cpu(), ph_acc, ACE_ph.cpu(), overall_acc
 
 
-def train_basemodel(data_type,cls,trainloader,valloader,bb_model,LossFunc,optimizer,num_epochs,batch_size,checkpoint_path):
+def train_basemodel(data_type,cls,trainloader,valloader,bb_model,LossFunc,optimizer,num_epochs,batch_size,checkpoint_path,depth,dim):
   train_loss = []
   valid_loss = []
   avg_train_losses = []
@@ -324,7 +324,7 @@ def train_basemodel(data_type,cls,trainloader,valloader,bb_model,LossFunc,optimi
             'epoch': epoch,
             'model_state_dict': bb_model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            },checkpoint_path+'/'+data_type+'_class'+str(num_classes)+'_model.pt')
+            },checkpoint_path+'/'+data_type+'_class'+str(num_classes)+'_model_'+'depth_'+str(depth)+'_dim_'+str(dim)+'.pt')
 
   return bb_model 
 
