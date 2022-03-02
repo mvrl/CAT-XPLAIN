@@ -88,7 +88,7 @@ def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,d
   else:
     # load basemodel
     ## Initialize base blackbox model
-    bb_checkpoint = torch.load(checkpoint_path+'/'+dataset_name+'_class'+str(num_classes)+'_model.pt')
+    bb_checkpoint = torch.load(checkpoint_path+'/'+dataset_name+'_class'+str(num_classes)+'_model_'+'depth_'+str(depth)+'_dim_'+str(dim)+'.pt'')
     bb_model = initialize_model(bb_model_type,num_classes=num_classes,input_dim=input_dim, channels=channels,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -197,7 +197,7 @@ def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,d
     best_model.load_state_dict(checkpoint['model_state_dict'])
 
     ## Initialize base blackbox model
-    bb_checkpoint = torch.load(checkpoint_path+'/'+dataset_name+'_class'+str(num_classes)+'_model.pt')
+    bb_checkpoint = torch.load(checkpoint_path+'/'+dataset_name+'_class'+str(num_classes)+'_model_'+'depth_'+str(depth)+'_dim_'+str(dim)+'.pt'')
     bb_model = initialize_model(bb_model_type,num_classes=num_classes,input_dim=input_dim, channels=channels,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
     bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
