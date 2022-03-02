@@ -9,6 +9,7 @@ logs/
 *.log
 *.pt
 MNIST_FMNIST_CIFAR/checkpoints/
+RSNA/checkpoints/
 <<<<<<< HEAD
 # MNIST_FMNIST_CIFAR/checkpoints/FashionMNIST/
 # MNIST_FMNIST_CIFAR/checkpoints/MNIST/
