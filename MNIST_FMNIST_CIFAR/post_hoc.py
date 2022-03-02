@@ -42,7 +42,7 @@ torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
 
 import sys
-def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,dim,num_patches,validation):
+def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,dim,num_patches,validation,load_bb_model):
   if dataset_class == 'full':
       num_classes = 10
   else:
@@ -75,15 +75,23 @@ def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,d
   LossFunc_basemodel = torch.nn.CrossEntropyLoss(size_average = True)
   optimizer_basemodel = torch.optim.Adam(bb_model.parameters(),lr = lr_basemodel) 
 
-  # train the basemodel 
-  bb_model = train_basemodel(dataset_name,cls,trainloader,
-                valloader,
-                bb_model,
-                LossFunc_basemodel,
-                optimizer_basemodel,
-                num_epochs_basemodel,
-                kwargs['batch_size'],
-                checkpoint_path)
+  if load_bb_model == 'false':
+    # train the basemodel 
+    bb_model = train_basemodel(dataset_name,cls,trainloader,
+                  valloader,
+                  bb_model,
+                  LossFunc_basemodel,
+                  optimizer_basemodel,
+                  num_epochs_basemodel,
+                  kwargs['batch_size'],
+                  checkpoint_path)
+  else:
+    # load basemodel
+    ## Initialize base blackbox model
+    bb_checkpoint = torch.load(checkpoint_path+'/'+dataset_name+'_class'+str(num_classes)+'_model.pt')
+    bb_model = initialize_model(bb_model_type,num_classes=num_classes,input_dim=input_dim, channels=channels,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
+    bb_model.load_state_dict(bb_checkpoint['model_state_dict'])
+    #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
   # testing the model on held-out validation dataset
   if validation == 'without_test':
@@ -218,6 +226,7 @@ if  __name__ == '__main__':
     parser.add_argument('--dataset_name',  type=str,help="Dataset type: Options:[fmnist, mnist, cifar]", default= 'mnist')
     parser.add_argument('--bb_model_type', type=str,help="Base_model type: Options:[ViT]",default="ViT")
     parser.add_argument('--sel_model_type', type=str,help="select_model type: Options:[ViT]",default="ViT")
+    parser.add_argument('--load_bb_model', type=str,help="either to load a saved bb model or not: Options:[true false]",default="false")
     parser.add_argument('--depth',  type=str,help="depth of the transformer block: Options[1,2,4,8,10]", default= "2")
     parser.add_argument('--dim',  type=str,help="dimension of hidden state: Options[64,128,256,512]", default= "128")
     parser.add_argument('--num_patches',  type=str,help="frac for number of patches to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
@@ -233,7 +242,8 @@ if  __name__ == '__main__':
     depth = int(args.depth)
     dim = int(args.dim)
     dataset_class = args.dataset_class
+    load_bb_model = args.load_bb_model
 
     train_eval(dataset_name=dataset_name,dataset_class=dataset_class,bb_model_type=bb_model_type, sel_model_type=sel_model_type,
-    depth=depth,dim=dim,num_patches=num_patches,validation=validation)
+    depth=depth,dim=dim,num_patches=num_patches,validation=validation,load_bb_model=load_bb_model)
 
