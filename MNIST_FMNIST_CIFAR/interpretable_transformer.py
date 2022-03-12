@@ -18,7 +18,7 @@ from joblib import dump, load
 from tqdm import tqdm
 from torch.utils.data import DataLoader, Sampler, SubsetRandomSampler
 from models import modifiedViT, initialize_model
-from utils import sample_concrete, custom_loss, generate_xs, metrics, imgs_with_random_patch_generator, load_dataset
+from utils import sample_concrete, custom_loss, generate_xs, metrics, imgs_with_random_patch_generator, load_dataset, train_post_expmodel
 from config import *
 import os
 
@@ -172,6 +172,10 @@ def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,vali
       best_model.load_state_dict(checkpoint['model_state_dict'])
       optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
       test_acc,test_ice,_,_,test_true_acc = metrics(cls, best_model,k,M,N,iter_num,testloader,imgs_with_random_patch_test,best_model,intrinsic=True)
+      
+      ## Now train the model for 5 more epochs without the explainable component
+      if train_further == True:
+        test_acc = train_post_expmodel(iter_num,LossFunc,model_type,best_model,input_dim,channels,dim,N, M, depth,post_num_epochs,tau,k,batch_size,num_classes,cls,trainloader,valloader,testloader,optimizer,checkpoint_path,dataset_name,device)
       
       if validation == 'with_test':
         print('test (ph acc, ICE, ACC):',(test_acc,test_ice, test_true_acc))

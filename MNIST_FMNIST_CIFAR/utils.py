@@ -13,6 +13,7 @@ from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader, Sampler, SubsetRandomSampler
 from config import *
 from tqdm import tqdm
+from models import modifiedViT, initialize_model
 #################################################################################################################################
 
 
@@ -348,4 +349,76 @@ def test_basemodel(cls,valloader,bb_model):
     correct_count = correct_count + sum(labels == torch.argmax(out,axis=1))
     all_count = all_count + len(labels)
   print("Number Of Images Tested =", all_count)
-  print("Model Accuracy =", (correct_count/all_count)) 
+  print("Model Accuracy =", (correct_count/all_count))
+
+
+
+def test_expmodel(cls,valloader,exp_model,device):
+  num_classes = len(cls)
+  # testing the black box model performance on the entire validation dataset
+  correct_count, all_count = 0, 0
+  for images,labels in valloader:
+    images = images.to(device)
+    if num_classes != 2:
+      labels = labels.to(device)
+    else:
+      labels = (labels == cls[-1]).long().to(device)
+    with torch.no_grad():
+      out = exp_model(images)[0]
+      pred_label = torch.argmax(out,axis=1)
+    correct_count = correct_count + sum(labels == torch.argmax(out,axis=1))
+    all_count = all_count + len(labels)
+  
+  acc =  correct_count/all_count
+  return acc.cpu()
+
+def train_post_expmodel(iter_num,LossFunc,model_type,selector,input_dim,channels,dim,N,M,depth,post_num_epochs,tau,k,batch_size,num_classes,cls,trainloader,valloader,testloader,optimizer,checkpoint_path,dataset_name,device):
+# training loop
+  val_accs = []
+  for epoch in range(post_num_epochs):  
+    running_loss = 0
+    for i, data in enumerate(trainloader, 0):
+    # get the inputs
+      X, Y = data
+      X = X.to(device)
+      if num_classes != 2:
+        Y = Y.long().to(device)
+      else:
+        Y = (Y == cls[-1]).long().to(device)
+      batch_size = X.size(0)
+    # zero the parameter gradients
+      optimizer.zero_grad()
+      class_logits, patch_logits = selector.forward(X)   
+      loss = LossFunc(class_logits,Y)
+
+      loss.backward()
+      optimizer.step()
+
+      running_loss+=loss.item() # sum to caluclate average loss per sample later
+    
+    val_acc = test_expmodel(cls,valloader,selector,device)
+    val_accs.append(val_acc)
+
+    if not os.path.exists(checkpoint_path):
+      os.makedirs(checkpoint_path)
+    model_checkpoint = os.path.join(checkpoint_path,dataset_name+'_'+str(num_classes)+'_'+str(iter_num)+'_'+str(epoch)+'_Interpretable_selector_post_train.pt')
+    torch.save({
+        'epoch': epoch,
+        'model_state_dict': selector.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        }, model_checkpoint)     
+      
+  best_val_performance = val_accs
+  best_epoch = np.argmax(best_val_performance)
+  print("For post exp train BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
+  print("For post exp train  BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch]))
+  best_model_path = os.path.join(checkpoint_path,dataset_name+'_'+str(num_classes)+'_'+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector_post_train.pt')
+  best_model = initialize_model(model_type,num_classes=num_classes,input_dim=input_dim, channels=channels,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
+  
+  checkpoint = torch.load(best_model_path)
+  best_model.load_state_dict(checkpoint['model_state_dict'])
+  optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+  test_acc = test_expmodel(cls,testloader,best_model,device)
+  
+  return test_acc
+    
