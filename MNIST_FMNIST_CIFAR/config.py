@@ -22,8 +22,8 @@ N = 4
 tau = 0.1
 num_epochs = 10
 
-train_further = True
-post_num_epochs = 5
+train_further = False
+post_num_epochs = 10
 
 lr = 0.0001
 best_val_acc = 0

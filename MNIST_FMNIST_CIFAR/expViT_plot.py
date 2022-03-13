@@ -6,7 +6,7 @@ import pandas as pd
 
 log_path = '/home/skh259/LinLab/LinLab/CAT-XPLAIN/logs'
 
-dataset = "cifar"
+dataset = "fmnist"
 log_file = os.path.join(log_path,dataset+'_two_classes_expViT_loss_weight_sweep.log')
 with open(log_file,'r') as infile:
     text = infile.read()
@@ -53,20 +53,28 @@ df['test_full_acc'] = test_full_acc
 save_path = os.path.join(log_path,dataset+'_expViT_loss_sweep.csv')
 df.to_csv(save_path)
 
-def results_plot(log_path,dataset,frac,ph_acc,ace): 
+def results_plot(log_path,dataset,frac,ph_acc,ace,acc): 
     # line 1 points
     x1 = weights_list
     y1 = ph_acc
     # plotting the line 1 points 
-    plt.plot(x1, y1, label = "val_ph_acc")
+    plt.plot(x1, y1, label = "ph_acc")
     # line 2 points
     x2 = weights_list
     y2 = ace
     # plotting the line 2 points 
-    plt.plot(x2, y2, label = "val_ace")
+    plt.plot(x2, y2, label = "ace")
+
+    # line 3 points
+    x3 = weights_list
+    y3 = acc
+    # plotting the line 3 points 
+    plt.plot(x3, y3, label = "acc")
+
     plt.xlabel('loss_weight')
+
     # Set the y axis label of the current axis.
-    plt.ylabel('performance')
+    plt.ylabel('Test performance')
     # Set a title of the current axes.
     plt.title('Loss weight sweep frac_patches:'+str(frac)+" "+dataset)
     # show a legend on the plot
@@ -79,8 +87,11 @@ def results_plot(log_path,dataset,frac,ph_acc,ace):
 FRACS = [0.05,0.10,0.25,0.50,0.75]
 for f in FRACS:
     frac_result = df[df['fracs']==f]
+    ph_acc = list(frac_result['test_ph_acc'])
+    ace = list(frac_result['test_ace'])
+    acc = list(frac_result['test_full_acc'])
 
-    results_plot(log_path,dataset,f,list(frac_result['ph_acc']),list(frac_result['ace']))
+    results_plot(log_path,dataset,f,ph_acc,ace,acc)
     
 
 
