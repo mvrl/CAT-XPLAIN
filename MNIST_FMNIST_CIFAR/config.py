@@ -30,3 +30,5 @@ best_val_acc = 0
 num_init = 3 #number of initializations of the explainer
 
 tuning = False # Default: False. Wether to stop once the black box model is trained or not
+
+all_metrics = True #If checkpoint selection should be done based on ace and ph_acc or all (ace,ph_acc,acc)

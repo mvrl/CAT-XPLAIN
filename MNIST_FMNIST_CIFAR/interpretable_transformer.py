@@ -159,10 +159,15 @@ def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,vali
           # print loss and validation accuracy at the end of each epoch 
         print('\nInitialization Number %d-> epoch: %d, average loss: %.3f, val_acc: %.3f, ICE: %.3f \n' %(iter_num+1, epoch + 1,running_loss/i, val_acc, val_ice))
 
-      best_val_performance = [(val_accs[item]+val_ices[item])/2 for item in range(len(val_ices))]
+      if all_metrics == True:
+        best_val_performance = [(val_accs[item]+val_ices[item]+val_true_accs[item])/3 for item in range(len(val_ices))]
+      else:
+        best_val_performance = [(val_accs[item]+val_ices[item])/2 for item in range(len(val_ices))]
       best_epoch = np.argmax(best_val_performance)
       val_acc_list.append(val_accs[best_epoch])
       val_ice_list.append(val_ices[best_epoch])
+      val_true_acc_list.append(val_true_accs[best_epoch])
+
       print("BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
       print("BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch],val_ices[best_epoch]))
       best_model_path = os.path.join(checkpoint_path,dataset_name+'_'+str(num_classes)+'_'+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector.pt')

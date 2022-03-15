@@ -1,7 +1,7 @@
 # ATtention for CAusal eXPLAINation (CAT-XPLAIN)
 This project aims at providing causal explaination capability for existing Neural Network Architectures. It utilizes attention mechanism of Transformers to attend and hence identify the most important regions of input that have highest Causal significance to the output. This project is motivated from a paper titled ["Instance-wise Causal Feature Selection for Model Interpretation", 2021 by Pranoy et. al.](https://openaccess.thecvf.com/content/CVPR2021W/CiV/papers/Panda_Instance-Wise_Causal_Feature_Selection_for_Model_Interpretation_CVPRW_2021_paper.pdf) 
 
-Their paper proposes to build a model agnostic post-hoc explainer model that is able to identify the most causally significant regions in the input space (features selection) of each instance. Unlike the post-hoc explanation approach, we propose to modify the existing Transformer architecture so that the model able to inherently identify the regions with highest causal strength while performing the task they are designed for. This leads to development of Transformers with causal explaination capability without the need of additional post-hoc explainer.
+Their paper proposes to build a model agnostic post-hoc explainer model that is able to identify the most causally significant regions in the input space (features selection) of each instance. Unlike the post-hoc explanation approach, we propose to minor modification on the existing Transformer architecture so that the model is able to inherently identify the regions with highest causal strength while performing the task they are designed for. This leads to development of Transformers with causal explaination capability without the need of additional post-hoc explainer.
 
 
 ### Steps (for MNIST and FMNIST and CIFAR)
@@ -11,21 +11,21 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 3. Create a virtual environment for the project.
     `conda env create -f environment.yml`
 4.  `conda activate CAT-XPLAIN`
-5. Run the post-hoc experiment for MNIST or FMNIST or CIFAR datasets
+5. Example: Run the post-hoc experiment with 25% unmasked patches for MNIST or FMNIST or CIFAR datasets
 
-    `python ./MNIST_FMNIST_CIFAR/post_hoc.py --num_patches "0.25" --validation "with_test"  --dataset_name "mnist" --depth 2 --dim 256`
+    `python ./MNIST_FMNIST_CIFAR/post_hoc.py --num_patches "0.25" --validation "with_test"  --dataset_name "mnist" --dataset_class "partial" --depth 6 --dim 512`
+    
+    `python ./MNIST_FMNIST_CIFAR/post_hoc.py --num_patches "0.25" --validation "with_test" --dataset_name "fmnist" --dataset_class "partial" --depth 4 --dim 512`
 
-    `python ./MNIST_FMNIST_CIFAR/post_hoc.py --num_patches "0.25" --validation "with_test"  --dataset_name "fmnist" --depth 2 --dim 512`
+    `python ./MNIST_FMNIST_CIFAR/post_hoc.py --num_patches "0.25" --validation "with_test"  --dataset_name "cifar" --dataset_class "partial" --depth 8 --dim 512`
 
-    `python ./MNIST_FMNIST_CIFAR/post_hoc.py --num_patches "0.25" --validation "with_test"  --dataset_name "cifar" --depth 2 --dim 512`
+6. Example: Run the Interpretable transformer with 25% unmasked patches for MNIST or FMNIST or CIFAR datasets with loss_weight 0.90
 
-6. Run the Interpretable transformer for MNIST or FMNIST or CIFAR datasets
+    `python ./MNIST_FMNIST_CIFAR/interpretable_transformer.py --loss_weight "0.90" --dataset_name "mnist" --dataset_class "partial" --depth 6 --dim 512 --validation  "with_test" --num_patches "0.25"`
 
-    `python ./MNIST_FMNIST_CIFAR/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.60 --depth 2 --dim 256 --dataset_name "mnist"`
+    `python ./MNIST_FMNIST_CIFAR/interpretable_transformer.py --loss_weight "0.90" --dataset_name "fmnist" --dataset_class "partial" --depth 4 --dim 512 --validation  "with_test" --num_patches "0.25"`
 
-    `python ./MNIST_FMNIST_CIFAR/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.60  --depth 2 --dim 512 --dataset_name "fmnist"`
-
-    `python ./MNIST_FMNIST_CIFAR/interpretable_transformer.py --num_patches 0.25 --validation "with_test" --loss_weight 0.60  --depth 2 --dim 512 --dataset_name "cifar"`
+    `python ./MNIST_FMNIST_CIFAR/interpretable_transformer.py --loss_weight "0.90" --dataset_name "cifar" --dataset_class "partial" --depth 8 --dim 512 --validation  "with_test" --num_patches "0.25"`
 
 <!-- ### Steps (for IMDB dataset)
 1. Run the post-hoc experiment 
