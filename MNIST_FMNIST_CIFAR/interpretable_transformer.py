@@ -59,7 +59,7 @@ def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,vali
   else:
       num_classes = 2
   ###################################### LOAD DATASET ######################################################
-  cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize = load_dataset(dataset_name=dataset_name)
+  cls, trainloader, valloader, testloader, train_datasize, valid_datasize, test_datasize = load_dataset(dataset_name=dataset_name,dataset_class=dataset_class)
 
   if dataset_name == 'cifar':
     input_dim = 32
