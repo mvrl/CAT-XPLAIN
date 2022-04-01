@@ -6,7 +6,7 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 
 ### Steps (for MNIST and FMNIST and CIFAR)
 
-1. `https://github.com/Subash33/CAT-XPLAIN`
+1. `git clone git@github.com:mvrl/CAT-XPLAIN.git`
 2. `cd CAT-XPLAIN`
 3. Create a virtual environment for the project.
     `conda env create -f environment.yml`
