@@ -3,70 +3,7 @@
 import os
 import matplotlib.pyplot as plt 
 import pandas as pd
-
-log_path = '/home/skh259/LinLab/LinLab/CAT-XPLAIN/logs'
-all_metrics = True
-dataset = "fmnist"
-if all_metrics:
-    log_file = os.path.join(log_path,"all_metrics_"+dataset+'_two_classes_expViT_loss_weight_sweep.log')
-else:
-    log_file = os.path.join(log_path,dataset+'_two_classes_expViT_loss_weight_sweep.log')
-with open(log_file,'r') as infile:
-    text = infile.read()
-
-text = text.strip().split('\n')
-
-weights_list = [0.0, 0.25, 0.50, 0.60, 0.70, 0.80, 0.90,1.0]
-fracs = [0.05]*8+[0.10]*8+[0.25]*8+[0.50]*8+[0.75]*8
-loss_weights = weights_list+weights_list+weights_list+weights_list+weights_list
-
-df = pd.DataFrame(columns=['fracs','loss_weights','ph_acc','ace','acc','avg','test_ph_acc','test_ace','test_full_acc'])
-df['fracs'] = fracs
-df['loss_weights'] = loss_weights
-
-ph_acc = []
-ace = []
-acc = []
-avg = []
-test_ph_acc = []
-test_ace = []
-test_full_acc = []
-
-for line in text:
-    if line.startswith("mean val ph acc: "):
-        p = float(line.split("mean val ph acc: ")[1].strip().split(' ')[0])
-        ph_acc.append(p)
-    if line.startswith("mean val ICE: "):
-        a = float(line.split("mean val ICE: ")[1].strip().split(' ')[0])
-        ace.append(a)
-    if all_metrics:
-        if line.startswith("mean val true acc with whole input: "):
-            a = float(line.split("mean val true acc with whole input: ")[1].strip().split(' ')[0])
-            acc.append(a)
-
-    if line.startswith("mean test ph acc: "):
-        test_ph_acc.append(float(line.split("mean test ph acc: ")[1].strip().split(' ')[0]))
-    if line.startswith("mean test ICE: "):
-        test_ace.append(float(line.split("mean test ICE: ")[1].strip().split(' ')[0]))
-    if line.startswith("mean test true acc with whole input: "):
-        test_full_acc.append(float(line.split("mean test true acc with whole input: ")[1].strip().split(' ')[0]))
-
-df['ph_acc'] = ph_acc
-df['ace'] = ace
-df['acc'] = acc
-if all_metrics:
-    df['avg'] = [(ph_acc[i]+ace[i]+acc[i])/3 for i in range(len(ph_acc))]
-else:   
-    df['avg'] = [(ph_acc[i]+ace[i])/2 for i in range(len(ph_acc))]
-df['test_ph_acc'] = test_ph_acc
-df['test_ace'] = test_ace
-df['test_full_acc'] = test_full_acc
-
-if all_metrics:
-    save_path = os.path.join(log_path,dataset+'_expViT_loss_sweep_full_metrics.csv')
-else:
-    save_path = os.path.join(log_path,dataset+'_expViT_loss_sweep.csv')
-df.to_csv(save_path)
+from config import plots_path, log_path
 
 def results_plot(log_path,dataset,frac,ph_acc,ace,acc): 
     # line 1 points
@@ -96,21 +33,84 @@ def results_plot(log_path,dataset,frac,ph_acc,ace,acc):
     plt.legend()
     # save a figure.
     if all_metrics:
-        plt.savefig(os.path.join(log_path,dataset+'_frac_'+str(frac)+'_loss_sweep_full_metrics.png'), bbox_inches='tight')
+        plt.savefig(os.path.join(plots_path,dataset+'_frac_'+str(frac)+'_loss_sweep_full_metrics.png'), bbox_inches='tight')
     else:
-        plt.savefig(os.path.join(log_path,dataset+'_frac_'+str(frac)+'_loss_sweep.png'), bbox_inches='tight')
+        plt.savefig(os.path.join(plots_path,dataset+'_frac_'+str(frac)+'_loss_sweep.png'), bbox_inches='tight')
     plt.close()
 
+datasets = ["mnist","fmnist","cifar"]
+for dataset in datasets:
+    all_metrics = True
+    if all_metrics:
+        log_file = os.path.join(log_path,"all_metrics_"+dataset+'_two_classes_expViT_loss_weight_sweep.log')
+    else:
+        log_file = os.path.join(log_path,dataset+'_two_classes_expViT_loss_weight_sweep.log')
+    with open(log_file,'r') as infile:
+        text = infile.read()
 
-FRACS = [0.05,0.10,0.25,0.50,0.75]
-for f in FRACS:
-    frac_result = df[df['fracs']==f]
-    ph_acc = list(frac_result['test_ph_acc'])
-    ace = list(frac_result['test_ace'])
-    acc = list(frac_result['test_full_acc'])
+    text = text.strip().split('\n')
 
-    results_plot(log_path,dataset,f,ph_acc,ace,acc)
-    
+    weights_list = [0.0, 0.25, 0.50, 0.60, 0.70, 0.80, 0.90,1.0]
+    fracs = [0.05]*8+[0.10]*8+[0.25]*8+[0.50]*8+[0.75]*8
+    loss_weights = weights_list+weights_list+weights_list+weights_list+weights_list
+
+    df = pd.DataFrame(columns=['fracs','loss_weights','ph_acc','ace','acc','avg','test_ph_acc','test_ace','test_full_acc'])
+    df['fracs'] = fracs
+    df['loss_weights'] = loss_weights
+
+    ph_acc = []
+    ace = []
+    acc = []
+    avg = []
+    test_ph_acc = []
+    test_ace = []
+    test_full_acc = []
+
+    for line in text:
+        if line.startswith("mean val ph acc: "):
+            p = float(line.split("mean val ph acc: ")[1].strip().split(' ')[0])
+            ph_acc.append(p)
+        if line.startswith("mean val ICE: "):
+            a = float(line.split("mean val ICE: ")[1].strip().split(' ')[0])
+            ace.append(a)
+        if all_metrics:
+            if line.startswith("mean val true acc with whole input: "):
+                a = float(line.split("mean val true acc with whole input: ")[1].strip().split(' ')[0])
+                acc.append(a)
+
+        if line.startswith("mean test ph acc: "):
+            test_ph_acc.append(float(line.split("mean test ph acc: ")[1].strip().split(' ')[0]))
+        if line.startswith("mean test ICE: "):
+            test_ace.append(float(line.split("mean test ICE: ")[1].strip().split(' ')[0]))
+        if line.startswith("mean test true acc with whole input: "):
+            test_full_acc.append(float(line.split("mean test true acc with whole input: ")[1].strip().split(' ')[0]))
+
+    df['ph_acc'] = ph_acc
+    df['ace'] = ace
+    df['acc'] = acc
+    if all_metrics:
+        df['avg'] = [(ph_acc[i]+ace[i]+acc[i])/3 for i in range(len(ph_acc))]
+    else:   
+        df['avg'] = [(ph_acc[i]+ace[i])/2 for i in range(len(ph_acc))]
+    df['test_ph_acc'] = test_ph_acc
+    df['test_ace'] = test_ace
+    df['test_full_acc'] = test_full_acc
+
+    if all_metrics:
+        save_path = os.path.join(plots_path,dataset+'_expViT_loss_sweep_full_metrics.csv')
+    else:
+        save_path = os.path.join(plots_path,dataset+'_expViT_loss_sweep.csv')
+    df.to_csv(save_path)
+
+    FRACS = [0.05,0.10,0.25,0.50,0.75]
+    for f in FRACS:
+        frac_result = df[df['fracs']==f]
+        ph_acc = list(frac_result['test_ph_acc'])
+        ace = list(frac_result['test_ace'])
+        acc = list(frac_result['test_full_acc'])
+
+        results_plot(plots_path,dataset,f,ph_acc,ace,acc)
+        
 
 
 

@@ -8,6 +8,8 @@ lr_basemodel = 0.0001
 
 data_path = '/home/skh259/LinLab/LinLab/CAT-XPLAIN/MNIST_FMNIST_CIFAR/checkpoints/'
 checkpoint_path = data_path
+plots_path = '/home/skh259/LinLab/LinLab/CAT-XPLAIN/MNIST_FMNIST_CIFAR/csv_results/'
+log_path = '/home/skh259/LinLab/LinLab/CAT-XPLAIN/logs'
 
 # global variables
 batch_size = 64
