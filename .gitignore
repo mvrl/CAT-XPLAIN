@@ -9,8 +9,7 @@ logs/
 *.log
 *.pt
 MNIST_FMNIST_CIFAR/checkpoints/
-MNIST_FMNIST_CIFAR/posthoc_hyper_selector.py
-MNIST_FMNIST_CIFAR/posthoc_results_extractor.py
+MNIST_FMNIST_CIFAR/csv_results/*.png
 RSNA/checkpoints/
 <<<<<<< HEAD
 # MNIST_FMNIST_CIFAR/checkpoints/FashionMNIST/
