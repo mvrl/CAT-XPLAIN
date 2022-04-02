@@ -57,8 +57,9 @@ def train_eval(dataset_name, dataset_class,bb_model_type, sel_model_type,depth,d
     input_dim = 32
     channels = 3
     # M*N x M*N is the size of the image
-    M = 4 # selection map size(assuming a square shaped selection map) 
-    N = 8 # patch size(square patch)
+    M = 8 # selection map size(assuming a square shaped selection map) 
+    N = 4 # patch size(square patch)
+
   else:
     input_dim = 28
     channels = 1
