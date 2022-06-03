@@ -37,4 +37,3 @@ dependencies:
     - torchio==0.18.71
     - torchtext==0.11.1
     - wget==3.2
-
