@@ -1,6 +1,0 @@
-,fracs,ph_acc,ace
-0,0.05,"mean test ph acc: 0.871 , std dev: 0.032","mean test ICE: 0.308 , std dev: 0.025"
-1,0.1,"mean test ph acc: 0.992 , std dev: 0.002","mean test ICE: 0.389 , std dev: 0.004"
-2,0.25,"mean test ph acc: 0.995 , std dev: 0.001","mean test ICE: 0.195 , std dev: 0.006"
-3,0.5,"mean test ph acc: 0.986 , std dev: 0.011","mean test ICE: 0.033 , std dev: 0.012"
-4,0.75,"mean test ph acc: 0.996 , std dev: 0.001","mean test ICE: 0.006 , std dev: 0.001"
