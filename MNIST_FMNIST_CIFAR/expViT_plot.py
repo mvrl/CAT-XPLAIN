@@ -51,8 +51,8 @@ for dataset in datasets:
     text = text.strip().split('\n')
 
     weights_list = [0.0, 0.25, 0.50, 0.60, 0.70, 0.80, 0.90,1.0]
-    fracs = ["0.05"]*8+["0.10"]*8+["0.25"]*8+["0.50"]*8+["0.75"]*8
-    loss_weights = weights_list+weights_list+weights_list+weights_list+weights_list
+    fracs = ["0.05"]*8+["0.10"]*8+["0.25"]*8+["0.50"]*8
+    loss_weights = weights_list+weights_list+weights_list+weights_list
 
     df = pd.DataFrame(columns=['fracs','loss_weights','ph_acc','ace','acc','avg','test_ph_acc','test_ace','test_full_acc'])
     df['fracs'] = fracs
@@ -101,7 +101,7 @@ for dataset in datasets:
         save_path = os.path.join(plots_path,dataset+'_expViT_loss_sweep.csv')
     df.to_csv(save_path)
 
-    FRACS = ["0.05","0.10","0.25","0.50","0.75"]
+    FRACS = ["0.05","0.10","0.25","0.50"]
     df_results = pd.DataFrame(columns=['fracs','loss_weight','test_ph_acc','test_ace','test_full_acc'])
     df_results['fracs'] = FRACS
     loss_weight = []

@@ -7,7 +7,7 @@ from config import plots_path, log_path
 
 datasets = ["mnist","fmnist","cifar"]
 for dataset in datasets:
-    fractions = [0.05,0.10,0.25,0.50,0.75]
+    fractions = [0.05,0.10,0.25,0.50]
     df = pd.DataFrame(columns=['fracs','ph_acc','ace'])
     log_file = os.path.join(log_path,dataset+"_two_classes_posthoc_results.log")
     with open(log_file,'r') as infile:
