@@ -11,8 +11,8 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 3. Create a virtual environment for the project.
     `conda env create -f environment.yml`
 4.  `conda activate CAT-XPLAIN`
-5. Run the post-hoc experiments for MNIST or FMNIST or CIFAR datasets
+5. Run the post-hoc experiments for MNIST or FMNIST or CIFAR datasets.\
     `sh ./MNIST_FMNIST_CIFAR/posthoc_run.sh`
 
-6. Run Interpretable transformer  for MNIST or FMNIST or CIFAR datasets 
+6. Run Interpretable transformer  for MNIST or FMNIST or CIFAR datasets.\ 
     `sh ./MNIST_FMNIST_CIFAR/expViT_run.sh`
