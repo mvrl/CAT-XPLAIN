@@ -4,7 +4,7 @@ This project aims at providing causal explaination capability for existing Neura
 Their paper proposes to build a model agnostic post-hoc explainer model that is able to identify the most causally significant regions in the input space (features selection) of each instance. Unlike the post-hoc explanation approach, we propose to minor modification on the existing Transformer architecture so that the model is able to inherently identify the regions with highest causal strength while performing the task they are designed for. This leads to development of Transformers with causal explaination capability without the need of additional post-hoc explainer.
 
 
-### Steps (for MNIST and FMNIST and CIFAR)
+### Steps
 
 1. `git clone git@github.com:mvrl/CAT-XPLAIN.git`
 2. `cd CAT-XPLAIN`
