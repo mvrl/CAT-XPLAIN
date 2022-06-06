@@ -15,3 +15,10 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
     `sh ./MNIST_FMNIST_CIFAR/posthoc_run.sh`
 6. Run Interpretable transformer  for MNIST,FMNIST, and CIFAR datasets.\
     `sh ./MNIST_FMNIST_CIFAR/expViT_run.sh`
+
+
+### Acknowledgement
+This code is adopted from Pranoy et. al repository ["Instance-wise Causal Feature Selection for Model Interpretation]("https://github.com/pranoy-panda/Causal-Feature-Subset-Selection")
+
+### Google colab demo
+["CAT-XPLAIN demo"]("https://colab.research.google.com/drive/1Y5cf5M0Df_Ot5grsaQJI6AZyzv1Iroe9?usp=sharing")
