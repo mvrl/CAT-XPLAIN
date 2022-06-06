@@ -18,7 +18,7 @@ Their paper proposes to build a model agnostic post-hoc explainer model that is 
 
 
 ### Acknowledgement
-This code is adopted from Pranoy et. al repository ["Instance-wise Causal Feature Selection for Model Interpretation]("https://github.com/pranoy-panda/Causal-Feature-Subset-Selection")
+This code is adopted from Pranoy's repository ["Instance-wise Causal Feature Selection for Model Interpretation](https://github.com/pranoy-panda/Causal-Feature-Subset-Selection)
 
 ### Google colab demo
-["CAT-XPLAIN demo"]("https://colab.research.google.com/drive/1Y5cf5M0Df_Ot5grsaQJI6AZyzv1Iroe9?usp=sharing")
+["CAT-XPLAIN demo"](https://colab.research.google.com/drive/1Y5cf5M0Df_Ot5grsaQJI6AZyzv1Iroe9?usp=sharing)
