@@ -139,7 +139,8 @@ for dataset in datasets:
         save_path = os.path.join(plots_path,dataset+'_expViT_results_full_metrics.csv')
     else:
         save_path = os.path.join(plots_path,dataset+'_expViT_results.csv')
-    df_results.to_csv(save_path)
+    df_results_test = df_results[['fracs','loss_weight','test_ph_acc','test_ace','test_full_acc']]
+    df_results_test.to_csv(save_path)
 
 
     for f in FRACS:
