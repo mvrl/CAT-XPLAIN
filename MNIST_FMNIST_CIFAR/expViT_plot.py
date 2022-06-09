@@ -26,7 +26,7 @@ def results_plot(log_path,dataset,frac,ph_acc,ace,acc):
     plt.xlabel('loss_weight')
 
     # Set the y axis label of the current axis.
-    plt.ylabel('Test performance')
+    plt.ylabel('Validation performance')
     # Set a title of the current axes.
     plt.title('Loss weight sweep frac_patches:'+str(frac)+" "+dataset)
     # show a legend on the plot
@@ -104,10 +104,15 @@ for dataset in datasets:
     FRACS = ["0.05","0.10","0.25","0.50"]
     df_results = pd.DataFrame(columns=['fracs','loss_weight','test_ph_acc','test_ace','test_full_acc'])
     df_results['fracs'] = FRACS
+    val_results = pd.DataFrame(columns=['fracs','loss_weight','val_ph_acc','val_ace','val_full_acc'])
+    val_results['fracs'] = FRACS
     loss_weight = []
     t_ph_acc = []
     t_ace = []
     t_acc = []
+    v_ph_acc = []
+    v_ace = []
+    v_acc = []
     for f in FRACS:
         max_avg = df[df['fracs']==f]['avg'].max()
         best_performance = df[(df['fracs']==f) & (df['avg']==max_avg)]
@@ -115,12 +120,20 @@ for dataset in datasets:
         t_ph_acc.append(best_performance['test_ph_acc'].item())
         t_ace.append(best_performance['test_ace'].item())
         t_acc.append(best_performance['test_full_acc'].item())
+        v_ph_acc.append(best_performance['ph_acc'].item())
+        v_ace.append(best_performance['ace'].item())
+        v_acc.append(best_performance['acc'].item())
+
     
     df_results['fracs'] = FRACS
     df_results['loss_weight'] = loss_weight
     df_results['test_ph_acc'] = t_ph_acc
     df_results['test_ace'] = t_ace
     df_results['test_full_acc'] = t_acc
+    df_results['ph_acc'] = v_ph_acc
+    df_results['ace'] = v_ace
+    df_results['acc'] = v_acc
+
 
     if all_metrics:
         save_path = os.path.join(plots_path,dataset+'_expViT_results_full_metrics.csv')
@@ -131,9 +144,9 @@ for dataset in datasets:
 
     for f in FRACS:
         frac_result = df[df['fracs']==f]
-        ph_acc = list(frac_result['test_ph_acc'])
-        ace = list(frac_result['test_ace'])
-        acc = list(frac_result['test_full_acc'])
+        ph_acc = list(frac_result['ph_acc'])
+        ace = list(frac_result['ace'])
+        acc = list(frac_result['acc'])
 
         results_plot(plots_path,dataset,f,ph_acc,ace,acc)
         
