@@ -23,7 +23,7 @@ def results_plot(log_path,dataset,frac,ph_acc,ace,acc):
     # plotting the line 3 points 
     plt.plot(x3, y3, label = "acc")
 
-    plt.xlabel('loss_weight')
+    plt.xlabel('$\lambda$')
 
     # Set the y axis label of the current axis.
     plt.ylabel('Validation performance')
