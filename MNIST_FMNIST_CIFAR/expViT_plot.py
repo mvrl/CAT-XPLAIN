@@ -30,12 +30,12 @@ def results_plot(log_path,dataset,frac,ph_acc,ace,acc):
     # Set a title of the current axes.
     plt.title('Loss weight sweep frac_patches:'+str(frac)+" "+dataset)
     # show a legend on the plot
-    plt.legend()
+    plt.legend(loc = "upper left")
     # save a figure.
     if all_metrics:
-        plt.savefig(os.path.join(plots_path,dataset+'_frac_'+str(frac)+'_loss_sweep_full_metrics.png'), bbox_inches='tight')
+        plt.savefig(os.path.join(plots_path,dataset+'_frac_'+str(frac)+'_loss_sweep_full_metrics.png'), bbox_inches='tight',dpi=1000)
     else:
-        plt.savefig(os.path.join(plots_path,dataset+'_frac_'+str(frac)+'_loss_sweep.png'), bbox_inches='tight')
+        plt.savefig(os.path.join(plots_path,dataset+'_frac_'+str(frac)+'_loss_sweep.png'), bbox_inches='tight',dpi=1000)
     plt.close()
 
 datasets = ["mnist","fmnist","cifar"]
