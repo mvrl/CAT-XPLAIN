@@ -94,9 +94,7 @@ def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,vali
   # mean and standard deviation of the metrics ph_acc and ICE.
   for iter_num in range(num_init):
       model_type = 'expViT'
-      bb_model = initialize_model(model_type,num_classes=num_classes,input_dim=input_dim, channels=channels,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
-     
-      selector = bb_model
+      selector = initialize_model(model_type,num_classes=num_classes,input_dim=input_dim, channels=channels,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
       LossFunc = torch.nn.CrossEntropyLoss(size_average = True)
       #optimizer
       optimizer = torch.optim.Adam(selector.parameters(),lr = lr)
@@ -132,7 +130,7 @@ def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,vali
         # 5: X_Sbar = elementwise_multiply(X,v); compute f_{bb}(X_Sbar)
           X_Sbar = torch.mul(X,v) # output shape will be [batch_size,1,M*N,M*N]
 
-          f_xsbar = F.softmax(bb_model(X_Sbar)[0]) # f_xs stores p(y|xs)
+          f_xsbar = F.softmax(selector(X_Sbar)[0]) # f_xs stores p(y|xs)
           with torch.no_grad():
               f_x =  F.softmax(class_logits) # f_x stores p(y|x)          
 
