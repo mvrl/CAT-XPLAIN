@@ -372,10 +372,10 @@ def test_expmodel(cls,valloader,exp_model,device):
   acc =  correct_count/all_count
   return acc.cpu()
 
-def train_post_expmodel(iter_num,LossFunc,model_type,selector,input_dim,channels,dim,N,M,depth,post_num_epochs,tau,k,batch_size,num_classes,cls,trainloader,valloader,testloader,optimizer,checkpoint_path,dataset_name,device):
+def train_prior_expmodel(iter_num,LossFunc,model_type,selector,input_dim,channels,dim,N,M,depth,pre_epochs,tau,k,batch_size,num_classes,cls,trainloader,valloader,testloader,optimizer,checkpoint_path,dataset_name,device):
 # training loop
   val_accs = []
-  for epoch in range(post_num_epochs):  
+  for epoch in range(pre_epochs):  
     running_loss = 0
     for i, data in enumerate(trainloader, 0):
     # get the inputs
@@ -401,7 +401,7 @@ def train_post_expmodel(iter_num,LossFunc,model_type,selector,input_dim,channels
 
     if not os.path.exists(checkpoint_path):
       os.makedirs(checkpoint_path)
-    model_checkpoint = os.path.join(checkpoint_path,dataset_name+'_'+str(num_classes)+'_'+str(iter_num)+'_'+str(epoch)+'_Interpretable_selector_post_train.pt')
+    model_checkpoint = os.path.join(checkpoint_path,dataset_name+'_'+str(num_classes)+'_'+str(iter_num)+'_'+str(epoch)+'_Interpretable_selector_pre_train.pt')
     torch.save({
         'epoch': epoch,
         'model_state_dict': selector.state_dict(),
@@ -410,15 +410,13 @@ def train_post_expmodel(iter_num,LossFunc,model_type,selector,input_dim,channels
       
   best_val_performance = val_accs
   best_epoch = np.argmax(best_val_performance)
-  print("For post exp train BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
-  print("For post exp train  BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch]))
-  best_model_path = os.path.join(checkpoint_path,dataset_name+'_'+str(num_classes)+'_'+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector_post_train.pt')
+  print("For CE pre-train BEST EPOCH BASED ON VAL PERFORMANCE:",best_epoch)
+  print("For CE pre-train  BEST (VAL_ACC,VAL_ICE)",(val_accs[best_epoch]))
+  best_model_path = os.path.join(checkpoint_path,dataset_name+'_'+str(num_classes)+'_'+str(iter_num)+'_'+str(best_epoch)+'_Interpretable_selector_pre_train.pt')
   best_model = initialize_model(model_type,num_classes=num_classes,input_dim=input_dim, channels=channels,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
   
   checkpoint = torch.load(best_model_path)
   best_model.load_state_dict(checkpoint['model_state_dict'])
   optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-  test_acc = test_expmodel(cls,testloader,best_model,device)
-  
-  return test_acc
+  return best_model, optimizer
     

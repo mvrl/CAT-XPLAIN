@@ -18,7 +18,7 @@ from joblib import dump, load
 from tqdm import tqdm
 from torch.utils.data import DataLoader, Sampler, SubsetRandomSampler
 from models import modifiedViT, initialize_model
-from utils import sample_concrete, custom_loss, generate_xs, metrics, imgs_with_random_patch_generator, load_dataset, train_post_expmodel
+from utils import sample_concrete, custom_loss, generate_xs, metrics, imgs_with_random_patch_generator, load_dataset, train_prior_expmodel
 from config import *
 import os
 
@@ -52,7 +52,7 @@ test_acc_list = []
 test_ice_list = []
 
 
-def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,validation):
+def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,validation,train_prior):
   frac_to_keep = str(num_patches)
   seed_initialize(seed = 12345)
   if dataset_class == 'full':
@@ -74,7 +74,7 @@ def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,vali
     # M*N x M*N is the size of the image
     M = 7 # selection map size(assuming a square shaped selection map) 
     N = 4 # patch size(square patch)
-  
+  batch_size = 64
   num_patches = int(num_patches*M*M)
   k = M*M-int(num_patches)# number of patches for S_bar
   ##########################################################################################################################################################
@@ -94,10 +94,15 @@ def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,vali
   # mean and standard deviation of the metrics ph_acc and ICE.
   for iter_num in range(num_init):
       model_type = 'expViT'
-      selector = initialize_model(model_type,num_classes=num_classes,input_dim=input_dim, channels=channels,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
       LossFunc = torch.nn.CrossEntropyLoss(size_average = True)
-      #optimizer
+      selector = initialize_model(model_type,num_classes=num_classes,input_dim=input_dim, channels=channels,patch_size=N,dim=dim,depth=depth,heads=8,mlp_dim=256,device=device)
       optimizer = torch.optim.Adam(selector.parameters(),lr = lr)
+      
+      if train_prior == True:
+        ## Now train the model for 5 more epochs without the explainable component
+        print("ExpViT pre-training with standard CE loss only")
+        selector, optimizer = train_prior_expmodel(iter_num,LossFunc,model_type,selector,input_dim,channels,dim,N, M, depth,pre_epochs,tau,k,batch_size,num_classes,cls,trainloader,valloader,testloader,optimizer,checkpoint_path,dataset_name,device)
+      
       # variable for keeping track of best ph_acc across different iterations 
       val_true_accs = []
       val_accs = []
@@ -177,10 +182,6 @@ def train_eval(dataset_name,dataset_class,loss_weight,depth,dim,num_patches,vali
       optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
       test_acc,test_ice,_,_,test_true_acc = metrics(cls, best_model,k,M,N,iter_num,testloader,imgs_with_random_patch_test,best_model,intrinsic=True)
       
-      ## Now train the model for 5 more epochs without the explainable component
-      if train_further == True:
-        test_acc = train_post_expmodel(iter_num,LossFunc,model_type,best_model,input_dim,channels,dim,N, M, depth,post_num_epochs,tau,k,batch_size,num_classes,cls,trainloader,valloader,testloader,optimizer,checkpoint_path,dataset_name,device)
-      
       if validation == 'with_test':
         print('test (ph acc, ICE, ACC):',(test_acc,test_ice, test_true_acc))
 
@@ -212,6 +213,7 @@ if  __name__ == '__main__':
     parser.add_argument('--num_patches',  type=str,help="frac for number of patches to select: Options[0.05,0.10,0.25,0.50,0.75]", default= "0.25")
     parser.add_argument('--validation', type=str,help=" Perform validation on validation or test set: Options:[without_test, with_test]",default="with_test")
     parser.add_argument('--dataset_class', type=str,help="select_model type: Options:[partial,full]",default="partial")
+    parser.add_argument('--train_prior', type=str,help="Train the expViT only with CE during warmup epochs:[true,false]",default="false")
     args = parser.parse_args()
     dataset_name = args.dataset_name
     num_patches = float(args.num_patches)
@@ -219,7 +221,9 @@ if  __name__ == '__main__':
     validation = args.validation 
     depth = int(args.depth)
     dim = int(args.dim)
-    dataset_class = args.dataset_class 
+    dataset_class = args.dataset_class
+    bool_dict = {"true":True, "false":False}
+    train_prior = bool_dict[args.train_prior] 
 
     train_eval(dataset_name=dataset_name,dataset_class=dataset_class,loss_weight=loss_weight,
-            depth=depth,dim=dim,num_patches=num_patches,validation=validation)
+            depth=depth,dim=dim,num_patches=num_patches,validation=validation, train_prior=train_prior)
