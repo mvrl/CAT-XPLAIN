@@ -24,8 +24,6 @@ N = 4
 tau = 0.1
 num_epochs = 10
 
-pre_epochs = 10
-
 lr = 0.0001
 best_val_acc = 0
 num_init = 3 #number of initializations of the explainer
