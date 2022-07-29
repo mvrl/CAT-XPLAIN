@@ -39,6 +39,6 @@ This code is adopted from Pranoy's repository [Instance-wise Causal Feature Sele
 [CAT-XPLAIN demo](https://colab.research.google.com/drive/1tpzcLL1vX_mu0Pmc2Snz1ChqwX2acFXC?usp=sharing)
 
 ### Contact
-Subash Khanal
-University of Washington in St. Louis
+Subash Khanal\
+University of Washington in St. Louis\
 k.subash@wustl.edu
