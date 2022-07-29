@@ -1,7 +1,21 @@
-# ATtention for CAusal eXPLAINation (CAT-XPLAIN)
+# CAT-XPLAIN
+
+> Khanal, Subash, Benjamin Brodie, Xin Xing, Ai-Ling Lin, and Nathan Jacobs. "Causality for Inherently Explainable Transformers: CAT-XPLAIN." arXiv e-prints (2022): arXiv-2206.
+    
+    @article{khanal2022causality,
+    title={Causality for Inherently Explainable Transformers: CAT-XPLAIN},
+    author={Khanal, Subash and Brodie, Benjamin and Xing, Xin and Lin, Ai-Ling and Jacobs, Nathan},
+    journal={arXiv e-prints},
+    pages={arXiv--2206},
+    year={2022}
+    }
+
 This project incorporates causal explaination capability for a vision transformer (ViT). It utilizes attention mechanism of ViT to attend and hence identify the most important regions of input that have highest Causal significance to the output. This project is motivated from a paper titled ["Instance-wise Causal Feature Selection for Model Interpretation", 2021 by Pranoy et. al.](https://openaccess.thecvf.com/content/CVPR2021W/CiV/papers/Panda_Instance-Wise_Causal_Feature_Selection_for_Model_Interpretation_CVPRW_2021_paper.pdf) 
 
-Their paper proposes to build a model agnostic post-hoc explainer model that is able to identify the most significant causal regions in the input space of each instance. Unlike the post-hoc explanation approach, we propose a small modification on the existing Transformer architecture so that the model is able to inherently identify the regions with highest causal strength while performing the task they are designed for. This leads to development of inherently interpretable Transformers with causal explaination capability, eliminating the need of additional post-hoc explainer. More details can be read in this short paper of ours [CAT-XPLAIN](https://arxiv.org/abs/2206.14841). 
+Their paper proposes to build a model agnostic post-hoc explainer model that is able to identify the most significant causal regions in the input space of each instance. Unlike the post-hoc explanation approach, we propose a small modification on the existing Transformer architecture so that the model is able to inherently identify the regions with highest causal strength while performing the task they are designed for. This leads to development of inherently interpretable Transformers with causal explaination capability, eliminating the need of additional post-hoc explainer. 
+
+
+More details can be read in this arxiv paper.[pdf](https://arxiv.org/abs/2206.14841). 
 
 This paper was accepted for spotlight presentation at the [Explainable Artificial Intelligence for Computer Vision Workshop at CVPR 2022](https://xai4cv.github.io/workshop-schedule).
 
@@ -23,3 +37,8 @@ This code is adopted from Pranoy's repository [Instance-wise Causal Feature Sele
 
 ### Google colab demo
 [CAT-XPLAIN demo](https://colab.research.google.com/drive/1tpzcLL1vX_mu0Pmc2Snz1ChqwX2acFXC?usp=sharing)
+
+### Contact
+Subash Khanal
+University of Washington in St. Louis
+k.subash@wustl.edu
