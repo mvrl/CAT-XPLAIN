@@ -4,12 +4,13 @@ import os
 cfg = edict()
 
 num_epochs_basemodel = 10
-lr_basemodel = 0.0001 
+lr_basemodel = 0.0001
 
-data_path = '/home/skh259/LinLab/LinLab/CAT-XPLAIN/MNIST_FMNIST_CIFAR/checkpoints/'
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+data_path = os.path.join(_BASE_DIR, 'checkpoints')
 checkpoint_path = data_path
-plots_path = '/home/skh259/LinLab/LinLab/CAT-XPLAIN/MNIST_FMNIST_CIFAR/csv_results/'
-log_path = '/home/skh259/LinLab/LinLab/CAT-XPLAIN/logs'
+plots_path = os.path.join(_BASE_DIR, 'csv_results')
+log_path = os.path.join(os.path.dirname(_BASE_DIR), 'logs')
 
 # global variables
 batch_size = 64
